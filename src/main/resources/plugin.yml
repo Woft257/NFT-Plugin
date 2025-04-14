@@ -1,0 +1,27 @@
+name: NFTPlugin
+version: '1.0'
+main: com.minecraft.nftplugin.NFTPlugin
+api-version: '1.18'
+authors: [YourName]
+description: A Minecraft plugin that integrates Solana NFTs with in-game achievements
+softdepend: [SolanaLogin]
+
+commands:
+  nftinfo:
+    description: View information about your NFTs
+    usage: /nftinfo
+    permission: nftplugin.nftinfo
+  resetnft:
+    description: Reset a player's NFT and achievement progress
+    usage: /resetnft <player> [achievement_key]
+    permission: nftplugin.admin
+
+permissions:
+  nftplugin.nftinfo:
+    description: Allows players to view information about their NFTs
+    default: true
+  nftplugin.admin:
+    description: Gives access to all NFTPlugin commands
+    default: op
+    children:
+      nftplugin.nftinfo: true

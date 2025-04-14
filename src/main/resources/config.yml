@@ -1,0 +1,84 @@
+# NFT Plugin Configuration
+
+# Database Configuration
+database:
+  host: localhost
+  port: 3306
+  database: minecraft
+  username: root
+  password: password
+  table-prefix: nftplugin_
+
+# Achievement Settings
+# These are the items that will trigger NFT minting when held
+achievements:
+  # Great Light - Blaze Rod
+  anh_sang_vi_dai:
+    enabled: true                # Whether this achievement is enabled
+    type: named_item             # Type of achievement (named_item = holding an item with specific name)
+    material: BLAZE_ROD         # The Minecraft material type of the item
+    item_name: "Great Light"    # The exact name the item must have to trigger the achievement
+
+  # Ancient Scroll - Paper item
+  ancient_scroll:
+    enabled: true
+    type: named_item
+    material: PAPER
+    item_name: "Ancient Scroll" # The exact name the item must have to trigger the achievement
+
+  # Diamond Sword - Diamond Sword item
+  diamond_sword:
+    enabled: true
+    type: named_item
+    material: DIAMOND_SWORD
+    item_name: "Sword of Power" # The exact name the item must have to trigger the achievement
+
+# Solana Settings
+solana:
+  network: "devnet"             # Solana network (devnet, testnet, mainnet)
+  rpc_url: "https://api.devnet.solana.com"
+  server_wallet_private_key: "" # DO NOT FILL THIS IN THE CONFIG FILE! Use environment variable SOLANA_PRIVATE_KEY instead
+  mint_fee: 0.000005            # SOL amount for minting fee (paid by server wallet)
+
+# Metadata Files
+# Metadata files are automatically loaded from the 'metadata' directory
+# Each file should be named <achievement_key>.json
+# For example: anh_sang_vi_dai.json, ancient_scroll.json
+#
+# You can add new NFTs by simply adding new JSON files to the metadata directory
+# without modifying this config file or recompiling the plugin
+
+
+# Messages
+# These are the messages that will be sent to players
+# Color codes: &4 = dark red, &c = red, &6 = gold, &e = yellow, &2 = dark green, &a = green, &b = aqua, &9 = blue, &d = light purple, &5 = purple, &f = white, &7 = gray, &8 = dark gray, &0 = black
+# Format codes: &l = bold, &o = italic, &n = underline, &m = strikethrough, &k = obfuscated
+messages:
+  # Message prefix
+  prefix: "&8[&6NFT&8] &r"
+
+  # Wallet messages
+  wallet_registered: "&aYour Solana wallet has been registered successfully!"
+  wallet_already_registered: "&cYou already have a registered wallet!"
+  wallet_invalid: "&cInvalid Solana wallet address!"
+  no_wallet: "&cYou need to register a Solana wallet first! Use &6/connectwallet&c in SolanaLogin plugin."
+  wallet_not_verified: "&cYour wallet is not verified! Please verify your wallet using SolanaLogin plugin."
+
+  # Achievement messages
+  achievement_progress: "&7Progress: &6%current%&7/&6%required%&7 for &6%achievement%&7."
+  achievement_complete: "&aCongratulations! You have earned the &6%achievement%&a NFT!"
+
+  # NFT minting messages
+  nft_minting: "&6Minting your NFT... Please wait."
+  nft_minted: "&aYour NFT has been minted successfully! Transaction: &6%tx_id%"
+  nft_mint_failed: "&cFailed to mint NFT. Please contact an administrator."
+  item_preserved: "&aYour &6%item_name%&a has been preserved."
+
+  # NFT info command messages
+  nft_info: "&6NFT Information for &e%item_name%&6:\n&7Type: &e%nft_type%\n&7Description: &e%nft_description%\n&7Mint Address: &e%mint_address%\n&7Transaction: &e%tx_id%"
+  nft_info_not_found: "&cThis item is not an NFT or NFT information could not be found."
+  hold_nft_item: "&cYou must be holding an NFT item to use this command."
+
+  # Admin command messages
+  nft_reset: "&aThe NFT and achievement progress of &6%player%&a have been reset."
+  nft_reset_failed: "&cFailed to reset NFT and achievement progress."
