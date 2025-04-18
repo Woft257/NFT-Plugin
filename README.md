@@ -24,7 +24,7 @@ A Solana NFT integration plugin for Minecraft, allowing players to receive NFTs 
 
 ## 💾 Installation
 
-1. Download the latest JAR file from [<kbd>Download Latest Release</kbd>](https://github.com/yourusername/nft-plugin/releases)
+1. Download the latest JAR file from [<kbd>Download Latest Release</kbd>](https://github.com/Woft257/nft-plugin/releases)
 2. Place the JAR file in your Minecraft server's `plugins` directory
 3. Start the server to generate configuration files
 4. Configure the plugin in `plugins/NFTPlugin/config.yml`
@@ -293,6 +293,6 @@ If you have any questions or encounter issues, please create an issue on GitHub 
 
 ### ⭐ Enjoy using the Minecraft NFT Plugin! ⭐
 
-[<kbd>Report an Issue</kbd>](https://github.com/yourusername/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/yourusername/nft-plugin/issues/new?labels=enhancement)
+[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/Woft257/nft-plugin/issues/new?labels=enhancement)
 
 </div>
