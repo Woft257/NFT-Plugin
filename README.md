@@ -1,39 +1,42 @@
-# Minecraft NFT Plugin
+# ✨ Minecraft NFT Plugin ✨
 
-Plugin tích hợp Solana NFT cho Minecraft, cho phép người chơi nhận NFT khi đạt được các thành tựu trong game.
+A Solana NFT integration plugin for Minecraft, allowing players to receive NFTs when they achieve specific in-game accomplishments. This plugin creates a seamless bridge between Minecraft gameplay and Solana blockchain technology.
 
-## Tính năng
+## ✅ Features
 
-- **Mint NFT trên Solana DevNet** khi người chơi đạt được thành tựu
-- **Tích hợp với SolanaLogin** để liên kết ví Solana với tài khoản Minecraft
-- **Hệ thống thành tựu linh hoạt** dựa trên việc cầm vật phẩm có tên đặc biệt
-- **Lưu trữ NFT trong game** dưới dạng vật phẩm đặc biệt không thể rơi hoặc mất
-- **Cấu hình dễ dàng** thông qua file config.yml và metadata JSON
-- **Thêm thành tựu mới** mà không cần biên dịch lại plugin
+- **Mint NFTs on Solana DevNet** when players achieve in-game accomplishments
+- **SolanaLogin Integration** to link Solana wallets with Minecraft accounts
+- **Flexible Achievement System** based on holding specially named items
+- **Easy Configuration** through config.yml and JSON metadata files
+- **Add New Achievements** without recompiling the plugin
+- **Enhanced NFT Display** with compact and user-friendly information
+- **NFT List Command** with pagination for browsing all your NFTs
+- **Interactive UI** with clickable buttons for Solana Explorer and image links
+- **Visual Enhancements** for better user experience
 
-## Yêu cầu
+## ⚙️ Requirements
 
 - Minecraft Paper 1.18.2
-- Java 17 hoặc cao hơn
-- Node.js 16 hoặc cao hơn (cho backend Solana)
-- Plugin SolanaLogin (để liên kết ví Solana)
-- MySQL/MariaDB (để lưu trữ dữ liệu)
+- Java 17 or higher
+- Node.js 16 or higher (for Solana backend)
+- SolanaLogin Plugin (for wallet linking)
+- MySQL/MariaDB (for data storage)
 
-## Cài đặt
+## 💾 Installation
 
-1. Tải file JAR mới nhất từ [Releases](https://github.com/yourusername/nft-plugin/releases)
-2. Đặt file JAR vào thư mục `plugins` của server Minecraft
-3. Khởi động server để tạo các file cấu hình
-4. Cấu hình plugin trong `plugins/NFTPlugin/config.yml`
-5. Cài đặt backend Solana:
+1. Download the latest JAR file from [<kbd>Download Latest Release</kbd>](https://github.com/yourusername/nft-plugin/releases)
+2. Place the JAR file in your Minecraft server's `plugins` directory
+3. Start the server to generate configuration files
+4. Configure the plugin in `plugins/NFTPlugin/config.yml`
+5. Set up the Solana backend:
    ```bash
    cd plugins/NFTPlugin/solana-backend
    npm install
    ```
-6. Cấu hình backend Solana trong `plugins/NFTPlugin/solana-backend/.env`
-7. Khởi động lại server
+6. Configure the Solana backend in `plugins/NFTPlugin/solana-backend/.env`
+7. Restart the server
 
-## Cấu hình
+## 🔧 Configuration
 
 ### config.yml
 
@@ -67,37 +70,37 @@ achievements:
 solana:
   network: "devnet"
   rpc_url: "https://api.devnet.solana.com"
-  server_wallet_private_key: "" # Không điền vào đây! Sử dụng biến môi trường SOLANA_PRIVATE_KEY
+  server_wallet_private_key: "" # Do not fill this in here! Use the SOLANA_PRIVATE_KEY environment variable
   mint_fee: 0.000005
 ```
 
-### Cấu hình Backend Solana (.env)
+### Solana Backend Configuration (.env)
 
-Tạo file `.env` trong thư mục `plugins/NFTPlugin/solana-backend/` với nội dung:
+Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory with the following content:
 
 ```
-# Private key của ví Solana server (dạng base58)
+# Server wallet private key (base58 format)
 SOLANA_PRIVATE_KEY=your_private_key_here
 
-# Mạng Solana (devnet, testnet, mainnet)
+# Solana network (devnet, testnet, mainnet)
 SOLANA_NETWORK=devnet
 
-# RPC URL của Solana
+# Solana RPC URL
 SOLANA_RPC_URL=https://api.devnet.solana.com
 
-# Phí mint NFT (SOL)
+# NFT minting fee (SOL)
 MINT_FEE=0.000005
 
-# Thời gian chờ xác nhận giao dịch (milliseconds)
+# Transaction confirmation timeout (milliseconds)
 CONFIRMATION_TIMEOUT=60000
 
-# Số lần thử lại khi gặp lỗi
+# Number of retry attempts on error
 RETRY_COUNT=5
 ```
 
 ### Metadata Files
 
-Tạo file JSON trong thư mục `plugins/NFTPlugin/metadata/` cho mỗi thành tựu:
+Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achievement:
 
 **great_light.json**:
 ```json
@@ -120,7 +123,7 @@ Tạo file JSON trong thư mục `plugins/NFTPlugin/metadata/` cho mỗi thành 
     "target": "BLAZE_ROD",
     "target_name": "Great Light",
     "duration": 0,
-    "description": "Cầm Que Quỷ Lửa (Blaze Rod) được đặt tên 'Great Light'"
+    "description": "Hold a Blaze Rod named 'Great Light'"
   }
 }
 ```
@@ -146,51 +149,59 @@ Tạo file JSON trong thư mục `plugins/NFTPlugin/metadata/` cho mỗi thành 
     "target": "PAPER",
     "target_name": "Ancient Scroll",
     "duration": 0,
-    "description": "Cầm Giấy (Paper) được đặt tên 'Ancient Scroll'"
+    "description": "Hold a Paper item named 'Ancient Scroll'"
   }
 }
 ```
 
-## Lệnh
+## 💬 Commands
 
-- `/nftinfo` - Hiển thị thông tin về NFT đang cầm trên tay
-- `/resetnft <player>` - Đặt lại tiến trình thành tựu và NFT của người chơi (chỉ Admin)
+- `/nftinfo` - Display information about the NFT item currently held in hand
+- `/nftlist` - View a list of all your NFTs with pagination
+- `/resetnft <player>` - Reset a player's achievement and NFT progress (Admin only)
+- `/mintnft <player> <achievement_key>` - Manually mint an NFT for a player (Admin only)
 
-## Cách sử dụng
+## 📖 Usage Guide
 
-1. **Đăng ký ví Solana**:
-   - Người chơi cần đăng ký ví Solana của họ bằng plugin SolanaLogin
-   - Sử dụng lệnh `/connectwallet <địa_chỉ_ví>` từ plugin SolanaLogin
+1. **Register Solana Wallet**:
+   - Players need to register their Solana wallet using the SolanaLogin plugin
+   - Use the command `/connectwallet <wallet_address>` from the SolanaLogin plugin
 
-2. **Đạt được thành tựu**:
-   - Người chơi cần tìm và cầm vật phẩm có tên đặc biệt
-   - Khi cầm vật phẩm, plugin sẽ tự động mint NFT và gửi đến ví Solana của người chơi
-   - Vật phẩm gốc sẽ bị xóa và thay thế bằng vật phẩm NFT trong game
+2. **Achieve Accomplishments**:
+   - Players need to find and hold specially named items
+   - When holding the item, the plugin will automatically mint an NFT and send it to the player's Solana wallet
+   - The original item will be removed and replaced with an in-game NFT item
 
-3. **Xem thông tin NFT**:
-   - Cầm vật phẩm NFT và sử dụng lệnh `/nftinfo`
-   - Thông tin chi tiết về NFT sẽ được hiển thị, bao gồm liên kết đến Solana Explorer
+3. **View NFT Information**:
+   - Hold the NFT item and use the `/nftinfo` command
+   - Detailed information about the NFT will be displayed, including clickable links to Solana Explorer
+   - The information is displayed in a compact and user-friendly format
 
-## Khắc phục sự cố
+4. **Browse Your NFT Collection**:
+   - Use the `/nftlist` command to open an inventory with all your NFTs
+   - Navigate through pages using the arrow buttons if you have many NFTs
+   - Click on any NFT to view detailed information about it
 
-### Lỗi "Signature is not valid"
+## 🔧 Troubleshooting
 
-Nếu gặp lỗi "Signature is not valid" khi mint NFT:
+### "Signature is not valid" Error
 
-1. **Kiểm tra số dư ví server**:
-   - Đảm bảo ví server có đủ SOL (ít nhất 0.05 SOL)
-   - Nạp SOL vào ví server từ [Solana Faucet](https://solfaucet.com/)
+If you encounter a "Signature is not valid" error when minting NFTs:
 
-2. **Thử RPC URL thay thế**:
-   - Thay đổi RPC_URL trong file `.env` thành `https://devnet.genesysgo.net/`
+1. **Check Server Wallet Balance**:
+   - Ensure the server wallet has sufficient SOL (at least 0.05 SOL)
+   - Add SOL to the server wallet from the Solana Faucet: [<kbd>Get SOL from Faucet</kbd>](https://solfaucet.com/)
 
-3. **Cập nhật Metaplex**:
+2. **Try Alternative RPC URL**:
+   - Change the RPC_URL in the `.env` file to `https://devnet.genesysgo.net/`
+
+3. **Update Metaplex**:
    ```bash
    cd plugins/NFTPlugin/solana-backend
    npm install @metaplex-foundation/js@latest
    ```
 
-4. **Xóa cache và cài đặt lại**:
+4. **Clear Cache and Reinstall**:
    ```bash
    cd plugins/NFTPlugin/solana-backend
    rm -rf node_modules
@@ -198,9 +209,9 @@ Nếu gặp lỗi "Signature is not valid" khi mint NFT:
    npm install
    ```
 
-### Lệnh test backend
+### Backend Testing Command
 
-Để test backend Solana trực tiếp:
+To test the Solana backend directly:
 
 ```bash
 cd plugins/NFTPlugin/solana-backend
@@ -216,18 +227,18 @@ node mint-nft.js \
   --achievement "test_achievement"
 ```
 
-## Thêm thành tựu mới
+## ✨ Adding New Achievements
 
-Để thêm thành tựu mới:
+To add a new achievement:
 
-1. **Tạo file metadata**:
-   - Tạo file JSON mới trong thư mục `plugins/NFTPlugin/metadata/`
-   - Đặt tên file theo định dạng `<achievement_key>.json`
+1. **Create a Metadata File**:
+   - Create a new JSON file in the `plugins/NFTPlugin/metadata/` directory
+   - Name the file according to the format `<achievement_key>.json`
 
-2. **Cập nhật config.yml**:
-   - Thêm mục mới trong phần `achievements` của file `config.yml`
+2. **Update config.yml**:
+   - Add a new entry in the `achievements` section of the `config.yml` file
 
-Ví dụ thêm thành tựu "Diamond Sword":
+Example for adding a "Diamond Sword" achievement:
 
 **diamond_sword.json**:
 ```json
@@ -250,16 +261,16 @@ Ví dụ thêm thành tựu "Diamond Sword":
     "target": "DIAMOND_SWORD",
     "target_name": "Sword of Power",
     "duration": 0,
-    "description": "Cầm Kiếm Kim Cương (Diamond Sword) được đặt tên 'Sword of Power'"
+    "description": "Hold a Diamond Sword named 'Sword of Power'"
   }
 }
 ```
 
-**Cập nhật config.yml**:
+**Update config.yml**:
 ```yaml
 achievements:
-  # Các thành tựu hiện có...
-  
+  # Existing achievements...
+
   # Diamond Sword
   diamond_sword:
     enabled: true
@@ -268,10 +279,20 @@ achievements:
     item_name: "Sword of Power"
 ```
 
-## Giấy phép
+## 🔐 License
 
-Plugin này được phát hành dưới giấy phép MIT.
+This plugin is released under the MIT License.
 
-## Liên hệ
+## 📬 Contact
 
-Nếu bạn có bất kỳ câu hỏi hoặc gặp vấn đề, vui lòng tạo issue trên GitHub hoặc liên hệ qua email: your.email@example.com
+If you have any questions or encounter issues, please create an issue on GitHub or contact via email: your.email@example.com
+
+---
+
+<div align="center">
+
+### ⭐ Enjoy using the Minecraft NFT Plugin! ⭐
+
+[<kbd>Report an Issue</kbd>](https://github.com/yourusername/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/yourusername/nft-plugin/issues/new?labels=enhancement)
+
+</div>

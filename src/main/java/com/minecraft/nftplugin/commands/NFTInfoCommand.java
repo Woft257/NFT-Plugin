@@ -45,11 +45,25 @@ public class NFTInfoCommand implements CommandExecutor {
         Optional<String> walletAddressOpt = plugin.getSolanaLoginIntegration().getWalletAddress(player.getUniqueId());
         String walletAddress = walletAddressOpt.orElse("Unknown");
 
-        // Display wallet information
+        // Display wallet information with improved formatting
         player.sendMessage("§8§m-----------------------------------------------------");
-        player.sendMessage("§6§lYour NFT Information");
+        player.sendMessage("§6§l✨ Your NFT Information ✨");
         player.sendMessage("§8§m-----------------------------------------------------");
-        player.sendMessage("§7Wallet Address: §f" + walletAddress);
+
+        // Format wallet address for extremely compact display
+        String displayWallet = walletAddress;
+        if (walletAddress.length() > 12) {
+            displayWallet = walletAddress.substring(0, 4) + "..." + walletAddress.substring(walletAddress.length() - 4);
+        }
+
+        player.sendMessage("§7Wallet: §b" + displayWallet);
+        player.sendMessage("§7View wallet on Solana Explorer: ");
+
+        // Add clickable link to view wallet on Solana Explorer
+        String walletExplorerUrl = "https://explorer.solana.com/address/" + walletAddress + "?cluster=devnet";
+        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+            "tellraw " + player.getName() + " {\"text\":\"§7[§a§lView Wallet on Explorer§7]\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + walletExplorerUrl + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"§7Click to view your wallet on Solana Explorer\"}}"
+        );
 
         // Check if player is holding an item
         if (player.getInventory().getItemInMainHand() != null && !player.getInventory().getItemInMainHand().getType().isAir()) {
@@ -70,36 +84,73 @@ public class NFTInfoCommand implements CommandExecutor {
                     String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName() ?
                                      item.getItemMeta().getDisplayName() : item.getType().toString();
 
-                    // Display detailed NFT information
+                    // Display detailed NFT information with improved formatting
                     player.sendMessage("§8§m-----------------------------------------------------");
                     player.sendMessage("§e§lNFT Details: §r§6" + achievementName);
                     player.sendMessage("§8§m-----------------------------------------------------");
-                    player.sendMessage("§7Item: §6" + itemName + " §7(§aNFT Item§7)");
-                    player.sendMessage("§7Description: §f" + description);
-                    player.sendMessage("§7Transaction ID: §f" + nftId);
-                    player.sendMessage("§7Achievement: §f" + achievementName);
-                    player.sendMessage("§7Network: §fSolana DevNet");
 
-                    // Display enchantments if any
-                    if (!item.getEnchantments().isEmpty()) {
-                        player.sendMessage("§7Enchantments: §f" + formatEnchantments(item));
+                    // Item name with NFT tag
+                    player.sendMessage("§7Item: §b" + itemName + " §a<NFT Item>");
+
+                    // Description with better formatting
+                    if (description != null && !description.isEmpty()) {
+                        player.sendMessage("§7Description: §f" + description);
                     }
 
-                    // Display Solana Explorer link
-                    player.sendMessage("§7View on Solana Explorer: §f§nhttps://explorer.solana.com/address/" + nftId + "?cluster=devnet");
+                    // Transaction ID with extremely shortened display
+                    String shortNftId = nftId;
+                    if (nftId.length() > 12) {
+                        shortNftId = nftId.substring(0, 4) + "..." + nftId.substring(nftId.length() - 4);
+                    }
+                    player.sendMessage("§7NFT ID: §f" + shortNftId);
 
-                    // Display image link
+                    // Achievement with colored text
+                    player.sendMessage("§7Achievement: §6" + achievementName);
+
+                    // Network with colored text
+                    player.sendMessage("§7Network: §3Solana DevNet");
+
+                    // Display enchantments if any with better formatting
+                    if (!item.getEnchantments().isEmpty()) {
+                        player.sendMessage("§7Enchantments: §d" + formatEnchantments(item));
+                    }
+
+                    player.sendMessage("§8§m-----------------------------------------------------");
+
+                    // Display Solana Explorer link with only the functional button
+                    String explorerUrl = "https://explorer.solana.com/address/" + nftId + "?cluster=devnet";
+                    player.sendMessage("§7View on Solana Explorer: ");
+
+                    // Use Spigot's JSON message API to create clickable links
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                        "tellraw " + player.getName() + " {\"text\":\"§7[§a§lClick to Open Explorer§7]\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + explorerUrl + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"§7Click to open Solana Explorer\"}}"
+                    );
+
+                    // Display image link with only the functional button
                     if (imageUrl != null && !imageUrl.isEmpty()) {
-                        player.sendMessage("§7Image: §f§n" + imageUrl);
+                        player.sendMessage("§7Image: ");
+                        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                            "tellraw " + player.getName() + " {\"text\":\"§7[§a§lOpen Image in Browser§7]\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + imageUrl + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"§7Click to view NFT image\"}}"
+                        );
                     }
                 }
             } else {
+                // Improved message when not holding an NFT item
+                player.sendMessage("§8§m-----------------------------------------------------");
+                player.sendMessage("§c§l❌ Not an NFT Item");
+                player.sendMessage("§8§m-----------------------------------------------------");
                 player.sendMessage("§7You are not holding an NFT item.");
-                player.sendMessage("§7Hold an NFT item to see its information.");
+                player.sendMessage("§7Hold an NFT item in your main hand to see its information.");
+                player.sendMessage("§7Use §e/nft get §7to obtain NFT items.");
             }
         } else {
-            player.sendMessage("§7You are not holding any item.");
+            // Improved message when not holding any item
+            player.sendMessage("§8§m-----------------------------------------------------");
+            player.sendMessage("§c§l❌ No Item Detected");
+            player.sendMessage("§8§m-----------------------------------------------------");
+            player.sendMessage("§7You are not holding any item in your main hand.");
             player.sendMessage("§7Hold an NFT item to see its information.");
+            player.sendMessage("§7Use §e/nft get §7to obtain NFT items.");
         }
 
         player.sendMessage("§8§m-----------------------------------------------------");
