@@ -8,6 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -20,6 +23,7 @@ public class DatabaseManager {
     private final String walletTable;
     private final String achievementTable;
     private final String nftTable;
+    private final String nftStorageTable;
 
     public DatabaseManager(NFTPlugin plugin) {
         this.plugin = plugin;
@@ -29,6 +33,7 @@ public class DatabaseManager {
         this.walletTable = prefix + "wallets";
         this.achievementTable = prefix + "achievements";
         this.nftTable = prefix + "nfts";
+        this.nftStorageTable = prefix + "nft_storage";
     }
 
     /**
@@ -150,6 +155,22 @@ public class DatabaseManager {
      */
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
+    }
+
+    /**
+     * Get the NFT table name
+     * @return The NFT table name
+     */
+    public String getNftTable() {
+        return nftTable;
+    }
+
+    /**
+     * Get the NFT storage table name
+     * @return The NFT storage table name
+     */
+    public String getNftStorageTable() {
+        return nftStorageTable;
     }
 
     /**
@@ -485,5 +506,72 @@ public class DatabaseManager {
             plugin.log(Level.SEVERE, "Failed to reset achievement progress: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Get all NFTs owned by a player
+     * @param uuid The player's UUID
+     * @return A list of NFTData objects
+     */
+    public List<NFTData> getPlayerNFTs(UUID uuid) {
+        List<NFTData> nfts = new ArrayList<>();
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT * FROM " + nftTable + " WHERE uuid = ? ORDER BY minted_at DESC")) {
+
+            stmt.setString(1, uuid.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    NFTData nft = new NFTData(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("achievement_key"),
+                            rs.getString("nft_id"),
+                            rs.getString("mint_address"),
+                            rs.getString("transaction_id"),
+                            rs.getTimestamp("minted_at")
+                    );
+                    nfts.add(nft);
+                }
+            }
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to get player NFTs: " + e.getMessage());
+        }
+
+        return nfts;
+    }
+
+    /**
+     * Get an NFT by its NFT ID
+     * @param nftId The NFT ID
+     * @return The NFTData object, or null if not found
+     */
+    public NFTData getNFTByNftId(String nftId) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT * FROM " + nftTable + " WHERE nft_id = ?")) {
+
+            stmt.setString(1, nftId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new NFTData(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("achievement_key"),
+                            rs.getString("nft_id"),
+                            rs.getString("mint_address"),
+                            rs.getString("transaction_id"),
+                            rs.getTimestamp("minted_at")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to get NFT by ID: " + e.getMessage());
+        }
+
+        return null;
     }
 }

@@ -3,12 +3,16 @@ package com.minecraft.nftplugin;
 import com.minecraft.nftplugin.achievements.AchievementManager;
 import com.minecraft.nftplugin.commands.MintNFTCommand;
 import com.minecraft.nftplugin.commands.NFTInfoCommand;
+
+import com.minecraft.nftplugin.commands.NFTListCommand;
 import com.minecraft.nftplugin.commands.ResetNFTCommand;
 import com.minecraft.nftplugin.database.DatabaseManager;
+
 import com.minecraft.nftplugin.integration.SolanaLoginIntegration;
 import com.minecraft.nftplugin.listeners.BlockBreakListener;
 import com.minecraft.nftplugin.listeners.InventoryListener;
 import com.minecraft.nftplugin.listeners.PlayerListener;
+import com.minecraft.nftplugin.metadata.MetadataManager;
 import com.minecraft.nftplugin.solana.SolanaService;
 import com.minecraft.nftplugin.utils.ConfigManager;
 import com.minecraft.nftplugin.utils.ItemManager;
@@ -27,6 +31,8 @@ public class NFTPlugin extends JavaPlugin {
     private ItemManager itemManager;
     private SolanaLoginIntegration solanaLoginIntegration;
     private AchievementManager achievementManager;
+    private MetadataManager metadataManager;
+
 
     @Override
     public void onEnable() {
@@ -60,12 +66,19 @@ public class NFTPlugin extends JavaPlugin {
         // Initialize item manager
         itemManager = new ItemManager(this);
 
+        // Initialize metadata manager
+        metadataManager = new MetadataManager(this);
+
+
+
         // Initialize achievement manager
         achievementManager = new AchievementManager(this);
         achievementManager.initializeAchievements();
 
         // Register commands
         getCommand("nftinfo").setExecutor(new NFTInfoCommand(this));
+        getCommand("nftlist").setExecutor(new NFTListCommand(this));
+
         getCommand("resetnft").setExecutor(new ResetNFTCommand(this));
         getCommand("mintnft").setExecutor(new MintNFTCommand(this));
 
@@ -142,6 +155,16 @@ public class NFTPlugin extends JavaPlugin {
     public AchievementManager getAchievementManager() {
         return achievementManager;
     }
+
+    /**
+     * Get the metadata manager
+     * @return The metadata manager
+     */
+    public MetadataManager getMetadataManager() {
+        return metadataManager;
+    }
+
+
 
     /**
      * Log a message with the specified level

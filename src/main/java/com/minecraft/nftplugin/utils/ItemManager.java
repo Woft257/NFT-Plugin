@@ -151,4 +151,28 @@ public class ItemManager {
         PersistentDataContainer container = meta.getPersistentDataContainer();
         return container.getOrDefault(achievementKey, PersistentDataType.STRING, null);
     }
+
+    /**
+     * Get the NFT key
+     * @return The NFT key
+     */
+    public NamespacedKey getNftKey() {
+        return nftKey;
+    }
+
+    /**
+     * Get the NFT ID key
+     * @return The NFT ID key
+     */
+    public NamespacedKey getNftIdKey() {
+        return nftIdKey;
+    }
+
+    /**
+     * Get the achievement key
+     * @return The achievement key
+     */
+    public NamespacedKey getAchievementNamespacedKey() {
+        return achievementKey;
+    }
 }
