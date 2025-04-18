@@ -15,6 +15,10 @@ commands:
     description: Reset a player's NFT and achievement progress
     usage: /resetnft <player> [achievement_key]
     permission: nftplugin.admin
+  mintnft:
+    description: Mint an NFT for a player using a specific metadata file
+    usage: /mintnft <username> <metadata_key>
+    permission: nftplugin.admin
 
 permissions:
   nftplugin.nftinfo:

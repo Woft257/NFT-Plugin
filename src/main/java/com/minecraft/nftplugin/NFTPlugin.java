@@ -1,6 +1,7 @@
 package com.minecraft.nftplugin;
 
 import com.minecraft.nftplugin.achievements.AchievementManager;
+import com.minecraft.nftplugin.commands.MintNFTCommand;
 import com.minecraft.nftplugin.commands.NFTInfoCommand;
 import com.minecraft.nftplugin.commands.ResetNFTCommand;
 import com.minecraft.nftplugin.database.DatabaseManager;
@@ -66,6 +67,7 @@ public class NFTPlugin extends JavaPlugin {
         // Register commands
         getCommand("nftinfo").setExecutor(new NFTInfoCommand(this));
         getCommand("resetnft").setExecutor(new ResetNFTCommand(this));
+        getCommand("mintnft").setExecutor(new MintNFTCommand(this));
 
         // Register event listeners
         Bukkit.getPluginManager().registerEvents(new BlockBreakListener(this), this);
