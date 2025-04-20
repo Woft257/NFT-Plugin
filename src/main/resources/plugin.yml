@@ -29,8 +29,8 @@ commands:
     usage: /mintnft <username> <metadata_key>
     permission: nftplugin.admin
   nftbuff:
-    description: View your active NFT buffs
-    usage: /nftbuff
+    description: View NFT buffs
+    usage: /nftbuff [player]
     permission: nftplugin.nftinfo
 
 permissions:
