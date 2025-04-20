@@ -330,4 +330,30 @@ public class ConfigManager {
     public int getNftItemCustomModelData() {
         return config.getInt("nft_item.custom_model_data", 1001);
     }
+
+    /**
+     * Get the NFT item material name for a specific achievement
+     * @param achievementKey The achievement key
+     * @return The material name, or null if not found
+     */
+    public String getNftItemMaterialName(String achievementKey) {
+        return config.getString("achievements." + achievementKey + ".item_material", null);
+    }
+
+    /**
+     * Get the Solana Explorer URL
+     * @return The Solana Explorer URL
+     */
+    public String getSolanaExplorerUrl() {
+        String network = getSolanaNetwork();
+        if ("mainnet".equals(network)) {
+            return "https://explorer.solana.com";
+        } else if ("devnet".equals(network)) {
+            return "https://explorer.solana.com/?cluster=devnet";
+        } else if ("testnet".equals(network)) {
+            return "https://explorer.solana.com/?cluster=testnet";
+        } else {
+            return "https://explorer.solana.com";
+        }
+    }
 }

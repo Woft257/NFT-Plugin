@@ -549,6 +549,15 @@ public class DatabaseManager {
      * @return The NFTData object, or null if not found
      */
     public NFTData getNFTByNftId(String nftId) {
+        return getNFTById(nftId);
+    }
+
+    /**
+     * Get an NFT by its ID
+     * @param nftId The NFT ID
+     * @return The NFTData object, or null if not found
+     */
+    public NFTData getNFTById(String nftId) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT * FROM " + nftTable + " WHERE nft_id = ?")) {

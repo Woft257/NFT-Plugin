@@ -2,16 +2,19 @@ package com.minecraft.nftplugin;
 
 import com.minecraft.nftplugin.achievements.AchievementManager;
 import com.minecraft.nftplugin.commands.MintNFTCommand;
+import com.minecraft.nftplugin.commands.NFTBuffCommand;
 import com.minecraft.nftplugin.commands.NFTInfoCommand;
-
+import com.minecraft.nftplugin.commands.NFTInventoryCommand;
 import com.minecraft.nftplugin.commands.NFTListCommand;
 import com.minecraft.nftplugin.commands.ResetNFTCommand;
 import com.minecraft.nftplugin.database.DatabaseManager;
 
 import com.minecraft.nftplugin.integration.SolanaLoginIntegration;
-import com.minecraft.nftplugin.listeners.BlockBreakListener;
+import com.minecraft.nftplugin.enchants.CustomEnchantManager;
+import com.minecraft.nftplugin.buffs.BuffManager;
+import com.minecraft.nftplugin.listeners.BuffListener;
+import com.minecraft.nftplugin.listeners.CustomEnchantListener;
 import com.minecraft.nftplugin.listeners.InventoryListener;
-import com.minecraft.nftplugin.listeners.PlayerListener;
 import com.minecraft.nftplugin.metadata.MetadataManager;
 import com.minecraft.nftplugin.solana.SolanaService;
 import com.minecraft.nftplugin.utils.ConfigManager;
@@ -32,6 +35,8 @@ public class NFTPlugin extends JavaPlugin {
     private SolanaLoginIntegration solanaLoginIntegration;
     private AchievementManager achievementManager;
     private MetadataManager metadataManager;
+    private CustomEnchantManager customEnchantManager;
+    private BuffManager buffManager;
 
 
     @Override
@@ -69,7 +74,11 @@ public class NFTPlugin extends JavaPlugin {
         // Initialize metadata manager
         metadataManager = new MetadataManager(this);
 
+        // Initialize custom enchant manager
+        customEnchantManager = new CustomEnchantManager(this);
 
+        // Initialize buff manager
+        buffManager = new BuffManager(this);
 
         // Initialize achievement manager
         achievementManager = new AchievementManager(this);
@@ -78,14 +87,18 @@ public class NFTPlugin extends JavaPlugin {
         // Register commands
         getCommand("nftinfo").setExecutor(new NFTInfoCommand(this));
         getCommand("nftlist").setExecutor(new NFTListCommand(this));
+        getCommand("nftinventory").setExecutor(new NFTInventoryCommand(this));
 
         getCommand("resetnft").setExecutor(new ResetNFTCommand(this));
         getCommand("mintnft").setExecutor(new MintNFTCommand(this));
+        getCommand("nftbuff").setExecutor(new NFTBuffCommand(this));
 
         // Register event listeners
-        Bukkit.getPluginManager().registerEvents(new BlockBreakListener(this), this);
+        // Bukkit.getPluginManager().registerEvents(new BlockBreakListener(this), this);
         Bukkit.getPluginManager().registerEvents(new InventoryListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        // Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new CustomEnchantListener(this, customEnchantManager), this);
+        Bukkit.getPluginManager().registerEvents(new BuffListener(this), this);
 
         getLogger().info("NFTPlugin has been enabled!");
     }
@@ -164,6 +177,21 @@ public class NFTPlugin extends JavaPlugin {
         return metadataManager;
     }
 
+    /**
+     * Get the custom enchant manager
+     * @return The custom enchant manager
+     */
+    public CustomEnchantManager getCustomEnchantManager() {
+        return customEnchantManager;
+    }
+
+    /**
+     * Get the buff manager
+     * @return The buff manager
+     */
+    public BuffManager getBuffManager() {
+        return buffManager;
+    }
 
 
     /**

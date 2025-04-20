@@ -64,16 +64,115 @@ public class ItemManager {
             // Add enchantments
             for (Map.Entry<String, Integer> entry : enchantments.entrySet()) {
                 try {
-                    Enchantment enchantment = Enchantment.getByName(entry.getKey());
-                    if (enchantment != null) {
-                        meta.addEnchant(enchantment, entry.getValue(), true);
-                    } else {
-                        plugin.getLogger().warning("Invalid enchantment: " + entry.getKey());
+                    String enchantKey = entry.getKey();
+                    int level = entry.getValue();
+
+                    // Check for custom enchantments
+                    if (enchantKey.equals("EXPLOSION")) {
+                        // Add to lore for CustomEnchantManager to process
+
+
+                        // Make sure the Special Enchantments section exists in lore
+                        boolean hasSpecialSection = false;
+                        for (String line : lore) {
+                            if (line.contains("§d§lSpecial Enchantments:")) {
+                                hasSpecialSection = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasSpecialSection) {
+                            lore.add("§d§lSpecial Enchantments:");
+                        }
+
+                        // Add the enchantment to lore if not already present
+                        boolean hasEnchant = false;
+                        for (String line : lore) {
+                            if (line.contains("§b- Explosion")) {
+                                hasEnchant = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasEnchant) {
+                            String romanLevel = arabicToRoman(level);
+                            int size = level + 2; // New formula for size (level 1 = 3 blocks)
+                            lore.add("§b- Explosion " + romanLevel + ": §7Break blocks in a " + size + "x" + size + " area (vertical plane when mining horizontally, horizontal plane when mining vertically)");
+                        }
+
+                        continue;
+                    } else if (enchantKey.equals("LASER")) {
+                        // Add to lore for CustomEnchantManager to process
+
+
+                        // Make sure the Special Enchantments section exists in lore
+                        boolean hasSpecialSection = false;
+                        for (String line : lore) {
+                            if (line.contains("§d§lSpecial Enchantments:")) {
+                                hasSpecialSection = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasSpecialSection) {
+                            lore.add("§d§lSpecial Enchantments:");
+                        }
+
+                        // Add the enchantment to lore if not already present
+                        boolean hasEnchant = false;
+                        for (String line : lore) {
+                            if (line.contains("§b- Laser")) {
+                                hasEnchant = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasEnchant) {
+                            String romanLevel = arabicToRoman(level);
+                            int depth = level + 1; // Simple formula for depth
+                            lore.add("§b- Laser " + romanLevel + ": §7Break blocks up to " + depth + " blocks deep");
+                        }
+
+                        continue;
+
+                    }
+
+                    // Handle standard Minecraft enchantments
+                    try {
+                        // Try to get the enchantment by name
+                        Enchantment enchantment = null;
+
+                        // Check for common enchantments
+                        if (enchantKey.equals("EFFICIENCY")) {
+                            enchantment = Enchantment.DIG_SPEED;
+                        } else if (enchantKey.equals("FORTUNE")) {
+                            enchantment = Enchantment.LOOT_BONUS_BLOCKS;
+                        } else if (enchantKey.equals("DURABILITY")) {
+                            enchantment = Enchantment.DURABILITY;
+                        } else if (enchantKey.equals("MENDING")) {
+                            enchantment = Enchantment.MENDING;
+                        } else if (enchantKey.equals("SILK_TOUCH")) {
+                            enchantment = Enchantment.SILK_TOUCH;
+                        } else {
+                            // Try to get by name (deprecated but still works)
+                            enchantment = Enchantment.getByName(enchantKey);
+                        }
+
+                        if (enchantment != null) {
+                            meta.addEnchant(enchantment, level, true);
+                        } else {
+                            plugin.getLogger().warning("Invalid enchantment: " + enchantKey);
+                        }
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to add enchantment: " + enchantKey + " - " + e.getMessage());
                     }
                 } catch (Exception e) {
                     plugin.getLogger().warning("Failed to add enchantment: " + e.getMessage());
                 }
             }
+
+            // Update lore
+            meta.setLore(lore);
 
             // Set custom model data
             meta.setCustomModelData(customModelData);
@@ -89,6 +188,11 @@ public class ItemManager {
 
             // Apply meta to item
             item.setItemMeta(meta);
+
+            // Apply custom enchantments if this is a special pickaxe
+            if (plugin.getCustomEnchantManager() != null) {
+                item = plugin.getCustomEnchantManager().applyMaxEnchantments(item);
+            }
         }
 
         return item;
@@ -174,5 +278,21 @@ public class ItemManager {
      */
     public NamespacedKey getAchievementNamespacedKey() {
         return achievementKey;
+    }
+
+    /**
+     * Convert an Arabic number to a Roman numeral
+     * @param arabic The Arabic number
+     * @return The Roman numeral
+     */
+    private String arabicToRoman(int arabic) {
+        switch (arabic) {
+            case 1: return "I";
+            case 2: return "II";
+            case 3: return "III";
+            case 4: return "IV";
+            case 5: return "V";
+            default: return "I";
+        }
     }
 }
