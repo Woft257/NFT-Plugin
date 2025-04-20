@@ -8,8 +8,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import com.minecraft.nftplugin.database.NFTData;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,8 +26,10 @@ public class BuffManager {
     private final NamespacedKey buffTypeKey;
     private final NamespacedKey buffValueKey;
 
-    // Pattern to extract buff values from lore
+    // Patterns to extract buff values from lore
     private final Pattern luckPattern = Pattern.compile("§b- Luck: §7\\+(\\d+)% chance");
+    private final Pattern luckyCharmPattern = Pattern.compile("Lucky Charm \\+(\\d+)%");
+    private final Pattern luckyCharmSimplePattern = Pattern.compile("\\+(\\d+)%");
 
     // Map to store player buffs
     private final Map<UUID, Map<BuffType, Integer>> playerBuffs = new HashMap<>();
@@ -68,6 +73,19 @@ public class BuffManager {
                 addBuffFromItem(player, item);
             }
         }
+
+        // Check equipped NFTs from NFTInventoryCommand
+        if (player.hasMetadata("nft_equipped_nfts")) {
+            try {
+                @SuppressWarnings("unchecked")
+                Set<String> equippedNFTs = (Set<String>) player.getMetadata("nft_equipped_nfts").get(0).value();
+                if (equippedNFTs != null && !equippedNFTs.isEmpty()) {
+                    addBuffsFromEquippedNFTs(player, equippedNFTs);
+                }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to get equipped NFTs for player " + player.getName() + ": " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -97,14 +115,74 @@ public class BuffManager {
             }
         }
 
-        // If not found in persistent data, check lore
+        // Check if this is a Lucky Charm item by achievement key
+        String achievementKey = plugin.getItemManager().getAchievementKey(item);
+        if (achievementKey != null && achievementKey.startsWith("lucky_charm_")) {
+            try {
+                // Extract the number from lucky_charm_X
+                int value = Integer.parseInt(achievementKey.substring("lucky_charm_".length()));
+                plugin.getLogger().info("Found Lucky Charm with value: " + value + " for player " + player.getName());
+                addBuff(player, BuffType.LUCK, value);
+                return;
+            } catch (NumberFormatException e) {
+                plugin.getLogger().warning("Invalid Lucky Charm format: " + achievementKey);
+            }
+        }
+
+        // If not found in persistent data or achievement key, check lore
         if (meta.hasLore()) {
             for (String line : meta.getLore()) {
-                // Check for luck buff
+                // Check for luck buff in standard format
                 Matcher luckMatcher = luckPattern.matcher(line);
                 if (luckMatcher.find()) {
                     int value = Integer.parseInt(luckMatcher.group(1));
                     addBuff(player, BuffType.LUCK, value);
+                    continue;
+                }
+
+                // Check for Lucky Charm format
+                Matcher charmMatcher = luckyCharmPattern.matcher(line);
+                if (charmMatcher.find()) {
+                    int value = Integer.parseInt(charmMatcher.group(1));
+                    addBuff(player, BuffType.LUCK, value);
+                    continue;
+                }
+
+                // Check for simple +X% format
+                Matcher simpleMatcher = luckyCharmSimplePattern.matcher(line);
+                if (simpleMatcher.find() && line.toLowerCase().contains("luck")) {
+                    int value = Integer.parseInt(simpleMatcher.group(1));
+                    addBuff(player, BuffType.LUCK, value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add buffs from equipped NFTs
+     * @param player The player
+     * @param equippedNFTs The set of equipped NFT IDs
+     */
+    public void addBuffsFromEquippedNFTs(Player player, Set<String> equippedNFTs) {
+        if (equippedNFTs == null || equippedNFTs.isEmpty()) {
+            return;
+        }
+
+        for (String nftId : equippedNFTs) {
+            NFTData nftData = plugin.getDatabaseManager().getNFTById(nftId);
+            if (nftData != null) {
+                String achievementKey = nftData.getAchievementKey();
+
+                // Check if it's a Lucky Charm
+                if (achievementKey != null && achievementKey.startsWith("lucky_charm_")) {
+                    try {
+                        // Extract the number from lucky_charm_X
+                        int value = Integer.parseInt(achievementKey.substring("lucky_charm_".length()));
+                        plugin.getLogger().info("Adding buff from equipped Lucky Charm: " + value + " for player " + player.getName());
+                        addBuff(player, BuffType.LUCK, value);
+                    } catch (NumberFormatException e) {
+                        plugin.getLogger().warning("Invalid Lucky Charm format: " + achievementKey);
+                    }
                 }
             }
         }

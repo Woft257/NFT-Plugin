@@ -13,24 +13,30 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
- * Command to display a virtual inventory of NFTs
+ * Command to display a real inventory for storing NFTs
  */
 public class NFTInventoryCommand implements CommandExecutor, Listener {
 
     private final NFTPlugin plugin;
-    private final String INVENTORY_TITLE = ChatColor.DARK_PURPLE + "NFT Inventory";
-    private final int ITEMS_PER_PAGE = 45; // 9x5 grid, leaving bottom row for navigation
-    private final Map<String, Integer> playerPages = new HashMap<>();
-    private final Map<UUID, List<NFTData>> playerNFTs = new HashMap<>();
+    private final String INVENTORY_TITLE = ChatColor.DARK_PURPLE + "NFT Inventory";  // Title for the inventory
+    private final int INVENTORY_SIZE = 54; // 6 rows of 9 slots
 
     public NFTInventoryCommand(NFTPlugin plugin) {
         this.plugin = plugin;
@@ -45,94 +51,32 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
         }
 
         Player player = (Player) sender;
-
-        // Load player's NFTs
-        loadPlayerNFTs(player);
-
-        // Open inventory
-        int page = 0;
-        if (args.length > 0) {
-            try {
-                page = Integer.parseInt(args[0]) - 1;
-                if (page < 0) {
-                    page = 0;
-                }
-            } catch (NumberFormatException e) {
-                player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.RED + "Invalid page number.");
-                return true;
-            }
-        }
-
-        openInventoryPage(player, page);
+        openNFTInventory(player);
         return true;
     }
 
     /**
-     * Load a player's NFTs from the database
+     * Open the NFT inventory for a player
      * @param player The player
      */
-    private void loadPlayerNFTs(Player player) {
-        List<NFTData> nfts = plugin.getDatabaseManager().getPlayerNFTs(player.getUniqueId());
-
-        // Debug: Print NFT count
-        plugin.getLogger().info("Loaded " + nfts.size() + " NFTs for player " + player.getName());
-
-        // Store in map
-        playerNFTs.put(player.getUniqueId(), nfts);
-    }
-
-    /**
-     * Open a specific page of the NFT inventory for a player
-     * @param player The player
-     * @param page The page number (0-based)
-     */
-    private void openInventoryPage(Player player, int page) {
-        List<NFTData> nfts = playerNFTs.get(player.getUniqueId());
-        if (nfts == null) {
-            nfts = new ArrayList<>();
-            playerNFTs.put(player.getUniqueId(), nfts);
-        }
-
-        if (nfts.isEmpty()) {
-            player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW + "You don't have any NFTs yet.");
-            // Still open an empty inventory
-        }
-
-        // Calculate total pages
-        int totalPages = (int) Math.ceil((double) nfts.size() / ITEMS_PER_PAGE);
-
-        // Validate page number
-        if (page < 0) {
-            page = 0;
-        } else if (page >= totalPages) {
-            page = totalPages - 1;
-        }
-
-        // Update player's current page
-        playerPages.put(player.getName(), page);
-
+    private void openNFTInventory(Player player) {
         // Create inventory with 54 slots (6 rows)
-        Inventory inventory = Bukkit.createInventory(player, 54, INVENTORY_TITLE + " - Page " + (page + 1) + "/" + totalPages);
+        Inventory inventory = Bukkit.createInventory(player, INVENTORY_SIZE, INVENTORY_TITLE);
 
-        // Calculate start and end indices for this page
-        int startIndex = page * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, nfts.size());
+        // Load NFTs from inventory database
+        Map<Integer, NFTData> inventoryNFTs = plugin.getDatabaseManager().getPlayerInventoryNFTs(player.getUniqueId());
 
         // Add NFT items to inventory
-        int slot = 0;
-        for (int i = startIndex; i < endIndex; i++) {
-            NFTData nft = nfts.get(i);
+        for (Map.Entry<Integer, NFTData> entry : inventoryNFTs.entrySet()) {
+            int slot = entry.getKey();
+            NFTData nft = entry.getValue();
 
             // Create NFT item
             ItemStack item = createNFTItem(nft);
 
             // Add to inventory
             inventory.setItem(slot, item);
-            slot++;
         }
-
-        // Add navigation buttons in the bottom row
-        addNavigationButtons(inventory, page, totalPages);
 
         // Open inventory for player
         player.openInventory(inventory);
@@ -167,10 +111,50 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.GRAY + description);
             lore.add("");
+
+            // Add buff information if it's a Lucky Charm
+            if (achievementKey.startsWith("lucky_charm_")) {
+                try {
+                    int buffValue = Integer.parseInt(achievementKey.substring("lucky_charm_".length()));
+                    lore.add(ChatColor.AQUA + "Luck: " + ChatColor.WHITE + "+" + buffValue + "%");
+                    lore.add("");
+                } catch (NumberFormatException e) {
+                    // Ignore parsing errors
+                }
+            }
+
+            // Add enchantment information
+            if (achievementKey.contains("explosion")) {
+                int level = 1; // Default level
+                if (achievementKey.contains("_")) {
+                    try {
+                        level = Integer.parseInt(achievementKey.substring(achievementKey.lastIndexOf("_") + 1));
+                    } catch (NumberFormatException e) {
+                        // Ignore parsing errors
+                    }
+                }
+                int size = level + 2; // New formula for size (level 1 = 3 blocks)
+                lore.add(ChatColor.LIGHT_PURPLE + "Explosion " + getRomanNumeral(level) + ": " +
+                         ChatColor.WHITE + "Break blocks in a " + size + "x" + size + " area");
+                lore.add("");
+            } else if (achievementKey.contains("laser")) {
+                int level = 1; // Default level
+                if (achievementKey.contains("_")) {
+                    try {
+                        level = Integer.parseInt(achievementKey.substring(achievementKey.lastIndexOf("_") + 1));
+                    } catch (NumberFormatException e) {
+                        // Ignore parsing errors
+                    }
+                }
+                int depth = level + 1; // Simple formula for depth
+                lore.add(ChatColor.LIGHT_PURPLE + "Laser " + getRomanNumeral(level) + ": " +
+                         ChatColor.WHITE + "Break blocks up to " + depth + " blocks deep");
+                lore.add("");
+            }
+
+            // Add NFT details
             lore.add(ChatColor.YELLOW + "NFT ID: " + ChatColor.WHITE + nft.getNftId());
             lore.add(ChatColor.YELLOW + "Acquired: " + ChatColor.WHITE + nft.getFormattedTimestamp());
-            lore.add("");
-            lore.add(ChatColor.YELLOW + "Click to view details");
 
             meta.setLore(lore);
 
@@ -182,6 +166,22 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
         }
 
         return item;
+    }
+
+    /**
+     * Convert a number to Roman numeral
+     * @param number The number to convert
+     * @return The Roman numeral
+     */
+    private String getRomanNumeral(int number) {
+        switch (number) {
+            case 1: return "I";
+            case 2: return "II";
+            case 3: return "III";
+            case 4: return "IV";
+            case 5: return "V";
+            default: return String.valueOf(number);
+        }
     }
 
     /**
@@ -221,99 +221,6 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
     }
 
     /**
-     * Add navigation buttons to the inventory
-     * @param inventory The inventory
-     * @param currentPage The current page
-     * @param totalPages The total number of pages
-     */
-    private void addNavigationButtons(Inventory inventory, int currentPage, int totalPages) {
-        // Add info button in the middle
-        ItemStack infoButton = new ItemStack(Material.BOOK);
-        ItemMeta infoMeta = infoButton.getItemMeta();
-        if (infoMeta != null) {
-            infoMeta.setDisplayName(ChatColor.YELLOW + "NFT Information");
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Page: " + ChatColor.WHITE + (currentPage + 1) + "/" + totalPages);
-
-            // Get total NFTs count from the owner of the inventory
-            int totalNFTs = 0;
-            if (inventory.getHolder() instanceof Player) {
-                Player owner = (Player) inventory.getHolder();
-                List<NFTData> nfts = playerNFTs.get(owner.getUniqueId());
-                if (nfts != null) {
-                    totalNFTs = nfts.size();
-                }
-            } else if (!inventory.getViewers().isEmpty()) {
-                // Fallback to first viewer if holder is not a player
-                UUID viewerUUID = inventory.getViewers().get(0).getUniqueId();
-                List<NFTData> nfts = playerNFTs.get(viewerUUID);
-                if (nfts != null) {
-                    totalNFTs = nfts.size();
-                }
-            }
-
-            lore.add(ChatColor.GRAY + "Total NFTs: " + ChatColor.GOLD + totalNFTs);
-            lore.add("");
-            lore.add(ChatColor.YELLOW + "Click on an NFT to view details");
-            infoMeta.setLore(lore);
-            infoButton.setItemMeta(infoMeta);
-        }
-        inventory.setItem(49, infoButton);
-
-        // Add previous page button if not on first page
-        if (currentPage > 0) {
-            ItemStack prevButton = new ItemStack(Material.ARROW);
-            ItemMeta prevMeta = prevButton.getItemMeta();
-            if (prevMeta != null) {
-                prevMeta.setDisplayName(ChatColor.GREEN + "Previous Page");
-                List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "Go to page " + currentPage);
-                prevMeta.setLore(lore);
-                prevButton.setItemMeta(prevMeta);
-            }
-            inventory.setItem(45, prevButton);
-        } else {
-            // Disabled previous button
-            ItemStack disabledButton = new ItemStack(Material.ARROW);
-            ItemMeta disabledMeta = disabledButton.getItemMeta();
-            if (disabledMeta != null) {
-                disabledMeta.setDisplayName(ChatColor.GRAY + "Previous Page");
-                List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "You are on the first page");
-                disabledMeta.setLore(lore);
-                disabledButton.setItemMeta(disabledMeta);
-            }
-            inventory.setItem(45, disabledButton);
-        }
-
-        // Add next page button if not on last page
-        if (currentPage < totalPages - 1) {
-            ItemStack nextButton = new ItemStack(Material.ARROW);
-            ItemMeta nextMeta = nextButton.getItemMeta();
-            if (nextMeta != null) {
-                nextMeta.setDisplayName(ChatColor.GREEN + "Next Page");
-                List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "Go to page " + (currentPage + 2));
-                nextMeta.setLore(lore);
-                nextButton.setItemMeta(nextMeta);
-            }
-            inventory.setItem(53, nextButton);
-        } else {
-            // Disabled next button
-            ItemStack disabledButton = new ItemStack(Material.ARROW);
-            ItemMeta disabledMeta = disabledButton.getItemMeta();
-            if (disabledMeta != null) {
-                disabledMeta.setDisplayName(ChatColor.GRAY + "Next Page");
-                List<String> lore = new ArrayList<>();
-                lore.add(ChatColor.GRAY + "You are on the last page");
-                disabledMeta.setLore(lore);
-                disabledButton.setItemMeta(disabledMeta);
-            }
-            inventory.setItem(53, disabledButton);
-        }
-    }
-
-    /**
      * Handle inventory click events
      */
     @EventHandler
@@ -326,69 +233,89 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
         String title = event.getView().getTitle();
 
         // Check if the clicked inventory is an NFT inventory
-        if (title.startsWith(INVENTORY_TITLE)) {
-            event.setCancelled(true); // Prevent taking items
-
-            ItemStack clickedItem = event.getCurrentItem();
-            if (clickedItem == null || clickedItem.getType() == Material.AIR) {
-                return;
-            }
-
-            // Get current page
-            Integer currentPage = playerPages.get(player.getName());
-            if (currentPage == null) {
-                currentPage = 0;
-            }
-
-            // Check if clicked on previous page button
-            if (event.getSlot() == 45 && clickedItem.getType() == Material.ARROW) {
-                // Debug: Print current page
-                plugin.getLogger().info("Clicked previous button. Current page: " + currentPage);
-
-                if (currentPage > 0) {
-                    plugin.getLogger().info("Going to page " + (currentPage - 1));
-                    openInventoryPage(player, currentPage - 1);
-                } else {
-                    plugin.getLogger().info("Already on first page");
-                }
-                return;
-            }
-
-            // Check if clicked on next page button
-            if (event.getSlot() == 53 && clickedItem.getType() == Material.ARROW) {
-                // Debug: Print current page
-                plugin.getLogger().info("Clicked next button. Current page: " + currentPage);
-
-                List<NFTData> nfts = playerNFTs.get(player.getUniqueId());
-                if (nfts != null) {
-                    int totalPages = (int) Math.ceil((double) nfts.size() / ITEMS_PER_PAGE);
-                    plugin.getLogger().info("Total pages: " + totalPages);
-
-                    if (currentPage < totalPages - 1) {
-                        plugin.getLogger().info("Going to page " + (currentPage + 1));
-                        openInventoryPage(player, currentPage + 1);
+        if (title.equals(INVENTORY_TITLE)) {
+            // Allow players to move NFT items within the inventory
+            if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.CHEST) {
+                // If clicking in the NFT inventory
+                ItemStack clickedItem = event.getCurrentItem();
+                if (clickedItem != null && clickedItem.getType() != Material.AIR) {
+                    // Check if it's an NFT item
+                    ItemMeta meta = clickedItem.getItemMeta();
+                    if (meta != null) {
+                        PersistentDataContainer container = meta.getPersistentDataContainer();
+                        String nftId = container.get(plugin.getItemManager().getNftIdKey(), PersistentDataType.STRING);
+                        if (nftId == null) {
+                            // Not an NFT item, cancel the event
+                            event.setCancelled(true);
+                            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                                ChatColor.RED + "Only NFT items can be placed in this inventory.");
+                        } else {
+                            // It's an NFT item, allow the move
+                            // Save the new position when inventory closes
+                        }
                     } else {
-                        plugin.getLogger().info("Already on last page");
+                        // No meta, cancel the event
+                        event.setCancelled(true);
                     }
                 }
-                return;
+            } else if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.PLAYER) {
+                // If clicking in the player inventory
+                ItemStack clickedItem = event.getCurrentItem();
+                if (clickedItem != null && clickedItem.getType() != Material.AIR) {
+                    // Check if it's an NFT item
+                    ItemMeta meta = clickedItem.getItemMeta();
+                    if (meta != null) {
+                        PersistentDataContainer container = meta.getPersistentDataContainer();
+                        String nftId = container.get(plugin.getItemManager().getNftIdKey(), PersistentDataType.STRING);
+                        if (nftId != null) {
+                            // It's an NFT item, allow the move
+                            // Save the new position when inventory closes
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle inventory drag events
+     */
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+
+        String title = event.getView().getTitle();
+        if (title.equals(INVENTORY_TITLE)) {
+            // Check if any of the slots are in the top inventory
+            boolean affectsTopInventory = false;
+            for (int slot : event.getRawSlots()) {
+                if (slot < INVENTORY_SIZE) {
+                    affectsTopInventory = true;
+                    break;
+                }
             }
 
-            // Handle click on NFT item
-            ItemMeta meta = clickedItem.getItemMeta();
-            if (meta != null) {
-                // Get NFT ID from persistent data container
-                PersistentDataContainer container = meta.getPersistentDataContainer();
-                String nftId = container.get(plugin.getItemManager().getNftIdKey(), PersistentDataType.STRING);
-
-                if (nftId != null) {
-                    // Display detailed NFT information
-                    player.closeInventory();
-                    displayNFTDetails(player, nftId);
-                } else {
-                    // Since we no longer store NFT ID in lore, just inform the player
-                    player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.RED + "Could not retrieve NFT information from this item.");
-                    player.closeInventory();
+            if (affectsTopInventory) {
+                // Check if it's an NFT item
+                ItemStack draggedItem = event.getOldCursor();
+                if (draggedItem != null && draggedItem.getType() != Material.AIR) {
+                    ItemMeta meta = draggedItem.getItemMeta();
+                    if (meta != null) {
+                        PersistentDataContainer container = meta.getPersistentDataContainer();
+                        String nftId = container.get(plugin.getItemManager().getNftIdKey(), PersistentDataType.STRING);
+                        if (nftId == null) {
+                            // Not an NFT item, cancel the event
+                            event.setCancelled(true);
+                            Player player = (Player) event.getWhoClicked();
+                            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                                ChatColor.RED + "Only NFT items can be placed in this inventory.");
+                        }
+                    } else {
+                        // No meta, cancel the event
+                        event.setCancelled(true);
+                    }
                 }
             }
         }
@@ -404,43 +331,63 @@ public class NFTInventoryCommand implements CommandExecutor, Listener {
         }
 
         String title = event.getView().getTitle();
-        if (title.startsWith(INVENTORY_TITLE)) {
-            // Clean up resources
+        if (title.equals(INVENTORY_TITLE)) {
+            // Save the inventory contents to the database
             Player player = (Player) event.getPlayer();
-            playerPages.remove(player.getName());
+            Inventory inventory = event.getInventory();
+
+            // Get player UUID
+            UUID playerUUID = player.getUniqueId();
+
+            // Get current NFTs in inventory from database
+            Map<Integer, NFTData> currentInventory = plugin.getDatabaseManager().getPlayerInventoryNFTs(playerUUID);
+            Set<Integer> usedSlots = new HashSet<>();
+
+            // First, collect all NFTs from the current inventory view
+            Map<Integer, String> newInventoryContents = new HashMap<>();
+            for (int slot = 0; slot < INVENTORY_SIZE; slot++) {
+                ItemStack item = inventory.getItem(slot);
+                if (item != null && item.getType() != Material.AIR) {
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null) {
+                        PersistentDataContainer container = meta.getPersistentDataContainer();
+                        String nftId = container.get(plugin.getItemManager().getNftIdKey(), PersistentDataType.STRING);
+                        if (nftId != null) {
+                            newInventoryContents.put(slot, nftId);
+                            usedSlots.add(slot);
+                        }
+                    }
+                }
+            }
+
+            // Log what we found
+            plugin.getLogger().info("Found " + newInventoryContents.size() + " NFTs in inventory view for player " + player.getName());
+
+            // Now update the database - first remove NFTs from slots that are now empty
+            for (Map.Entry<Integer, NFTData> entry : currentInventory.entrySet()) {
+                int slot = entry.getKey();
+                if (!usedSlots.contains(slot)) {
+                    // This slot is now empty, remove the NFT
+                    plugin.getDatabaseManager().removeNFTFromInventory(playerUUID, slot);
+                    plugin.getLogger().info("Removed NFT from slot " + slot + " for player " + player.getName());
+                }
+            }
+
+            // Then add or update NFTs in slots that now have NFTs
+            for (Map.Entry<Integer, String> entry : newInventoryContents.entrySet()) {
+                int slot = entry.getKey();
+                String nftId = entry.getValue();
+
+                // Add to database
+                boolean success = plugin.getDatabaseManager().addNFTToInventory(playerUUID, nftId, slot);
+                if (success) {
+                    plugin.getLogger().info("Added/Updated NFT " + nftId + " to slot " + slot + " for player " + player.getName());
+                } else {
+                    plugin.getLogger().warning("Failed to add NFT " + nftId + " to slot " + slot + " for player " + player.getName());
+                }
+            }
         }
     }
 
-    /**
-     * Display detailed information about an NFT
-     * @param player The player
-     * @param nftId The NFT ID
-     */
-    private void displayNFTDetails(Player player, String nftId) {
-        // Get NFT data from database
-        NFTData nftData = plugin.getDatabaseManager().getNFTById(nftId);
-        if (nftData == null) {
-            player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.RED + "NFT not found: " + nftId);
-            return;
-        }
 
-        // Get achievement details
-        String achievementKey = nftData.getAchievementKey();
-        String achievementName = getFormattedAchievementName(achievementKey);
-        String description = plugin.getConfigManager().getNftDescription(achievementKey);
-
-        // Display NFT information
-        player.sendMessage(ChatColor.GOLD + "===== NFT Details =====");
-        player.sendMessage(ChatColor.YELLOW + "Name: " + ChatColor.WHITE + achievementName);
-        player.sendMessage(ChatColor.YELLOW + "Description: " + ChatColor.WHITE + description);
-        player.sendMessage(ChatColor.YELLOW + "NFT ID: " + ChatColor.WHITE + nftId);
-        player.sendMessage(ChatColor.YELLOW + "Acquired: " + ChatColor.WHITE + nftData.getFormattedTimestamp());
-
-        // Display Solana Explorer link if available
-        String mintAddress = nftData.getMintAddress();
-        if (mintAddress != null && !mintAddress.isEmpty()) {
-            String explorerUrl = plugin.getConfigManager().getSolanaExplorerUrl() + "/address/" + mintAddress;
-            player.sendMessage(ChatColor.YELLOW + "Solana Explorer: " + ChatColor.AQUA + explorerUrl);
-        }
-    }
 }

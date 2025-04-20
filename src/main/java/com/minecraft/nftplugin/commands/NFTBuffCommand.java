@@ -91,8 +91,14 @@ public class NFTBuffCommand implements CommandExecutor {
      * @param targetPlayer The target player
      */
     private void showPlayerBuffsCompact(CommandSender sender, Player targetPlayer) {
+        // Force update player buffs to ensure we have the latest data
+        plugin.getBuffManager().updatePlayerBuffs(targetPlayer);
+
         Map<BuffType, Integer> playerBuffs = plugin.getBuffManager().getAllPlayerBuffs()
                 .getOrDefault(targetPlayer.getUniqueId(), new HashMap<>());
+
+        // Debug: Log the player's buffs
+        plugin.getLogger().info("Player " + targetPlayer.getName() + " has buffs: " + playerBuffs);
 
         // Build compact format string with just the numbers
         StringBuilder compactFormat = new StringBuilder();
@@ -100,6 +106,7 @@ public class NFTBuffCommand implements CommandExecutor {
         // Add values for each buff type
         for (BuffType buffType : BuffType.values()) {
             int value = playerBuffs.getOrDefault(buffType, 0);
+            plugin.getLogger().info("Buff " + buffType.name() + " = " + value);
             if (value > 0) {
                 compactFormat.append(value).append(" ");
             }

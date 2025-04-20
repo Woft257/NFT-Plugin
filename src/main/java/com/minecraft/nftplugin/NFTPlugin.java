@@ -15,6 +15,7 @@ import com.minecraft.nftplugin.buffs.BuffManager;
 import com.minecraft.nftplugin.listeners.BuffListener;
 import com.minecraft.nftplugin.listeners.CustomEnchantListener;
 import com.minecraft.nftplugin.listeners.InventoryListener;
+import com.minecraft.nftplugin.listeners.PlayerListener;
 import com.minecraft.nftplugin.metadata.MetadataManager;
 import com.minecraft.nftplugin.solana.SolanaService;
 import com.minecraft.nftplugin.utils.ConfigManager;
@@ -96,7 +97,7 @@ public class NFTPlugin extends JavaPlugin {
         // Register event listeners
         // Bukkit.getPluginManager().registerEvents(new BlockBreakListener(this), this);
         Bukkit.getPluginManager().registerEvents(new InventoryListener(this), this);
-        // Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
         Bukkit.getPluginManager().registerEvents(new CustomEnchantListener(this, customEnchantManager), this);
         Bukkit.getPluginManager().registerEvents(new BuffListener(this), this);
 

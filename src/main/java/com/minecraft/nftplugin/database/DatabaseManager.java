@@ -10,7 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -24,6 +26,7 @@ public class DatabaseManager {
     private final String achievementTable;
     private final String nftTable;
     private final String nftStorageTable;
+    private final String nftInventoryTable;
 
     public DatabaseManager(NFTPlugin plugin) {
         this.plugin = plugin;
@@ -34,6 +37,7 @@ public class DatabaseManager {
         this.achievementTable = prefix + "achievements";
         this.nftTable = prefix + "nfts";
         this.nftStorageTable = prefix + "nft_storage";
+        this.nftInventoryTable = prefix + "nft_inventory";
     }
 
     /**
@@ -145,6 +149,20 @@ public class DatabaseManager {
                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")) {
                 stmt.executeUpdate();
             }
+
+            // Create NFT Inventory table
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "CREATE TABLE IF NOT EXISTS " + nftInventoryTable + " (" +
+                            "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                            "uuid VARCHAR(36) NOT NULL, " +
+                            "nft_id VARCHAR(64) NOT NULL, " +
+                            "slot INT NOT NULL, " +
+                            "added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                            "UNIQUE KEY unique_player_nft_slot (uuid, slot), " +
+                            "UNIQUE KEY unique_nft_id (nft_id)" +
+                            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")) {
+                stmt.executeUpdate();
+            }
         }
     }
 
@@ -171,6 +189,14 @@ public class DatabaseManager {
      */
     public String getNftStorageTable() {
         return nftStorageTable;
+    }
+
+    /**
+     * Get the NFT inventory table name
+     * @return The NFT inventory table name
+     */
+    public String getNftInventoryTable() {
+        return nftInventoryTable;
     }
 
     /**
@@ -582,5 +608,129 @@ public class DatabaseManager {
         }
 
         return null;
+    }
+
+    /**
+     * Add an NFT to a player's inventory
+     * @param uuid The player's UUID
+     * @param nftId The NFT ID
+     * @param slot The inventory slot
+     * @return True if successful, false otherwise
+     */
+    public boolean addNFTToInventory(UUID uuid, String nftId, int slot) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO " + nftInventoryTable + " (uuid, nft_id, slot) VALUES (?, ?, ?) " +
+                             "ON DUPLICATE KEY UPDATE nft_id = ?")) {
+
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, nftId);
+            stmt.setInt(3, slot);
+            stmt.setString(4, nftId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to add NFT to inventory: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Remove an NFT from a player's inventory
+     * @param uuid The player's UUID
+     * @param slot The inventory slot
+     * @return True if successful, false otherwise
+     */
+    public boolean removeNFTFromInventory(UUID uuid, int slot) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "DELETE FROM " + nftInventoryTable + " WHERE uuid = ? AND slot = ?")) {
+
+            stmt.setString(1, uuid.toString());
+            stmt.setInt(2, slot);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to remove NFT from inventory: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Remove an NFT from a player's inventory by NFT ID
+     * @param nftId The NFT ID
+     * @return True if successful, false otherwise
+     */
+    public boolean removeNFTFromInventoryByNftId(String nftId) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "DELETE FROM " + nftInventoryTable + " WHERE nft_id = ?")) {
+
+            stmt.setString(1, nftId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to remove NFT from inventory by NFT ID: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get all NFTs in a player's inventory
+     * @param uuid The player's UUID
+     * @return A map of slot to NFTData
+     */
+    public Map<Integer, NFTData> getPlayerInventoryNFTs(UUID uuid) {
+        Map<Integer, NFTData> inventoryNFTs = new HashMap<>();
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT i.slot, n.* FROM " + nftInventoryTable + " i " +
+                             "JOIN " + nftTable + " n ON i.nft_id = n.nft_id " +
+                             "WHERE i.uuid = ? ORDER BY i.slot")) {
+
+            stmt.setString(1, uuid.toString());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int slot = rs.getInt("slot");
+                    NFTData nft = new NFTData(
+                            rs.getInt("id"),
+                            UUID.fromString(rs.getString("uuid")),
+                            rs.getString("achievement_key"),
+                            rs.getString("nft_id"),
+                            rs.getString("mint_address"),
+                            rs.getString("transaction_id"),
+                            rs.getTimestamp("minted_at")
+                    );
+                    inventoryNFTs.put(slot, nft);
+                }
+            }
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to get player inventory NFTs: " + e.getMessage());
+        }
+
+        return inventoryNFTs;
+    }
+
+    /**
+     * Check if an NFT is in any player's inventory
+     * @param nftId The NFT ID
+     * @return True if the NFT is in an inventory, false otherwise
+     */
+    public boolean isNFTInInventory(String nftId) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT 1 FROM " + nftInventoryTable + " WHERE nft_id = ?")) {
+
+            stmt.setString(1, nftId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            plugin.log(Level.SEVERE, "Failed to check if NFT is in inventory: " + e.getMessage());
+            return false;
+        }
     }
 }
