@@ -23,13 +23,9 @@ import org.bukkit.persistence.PersistentDataType;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -102,15 +98,15 @@ public class MintNFTCommand implements CommandExecutor {
         }
 
         // Inform player
-        player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW + 
+        player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW +
                 "Minting NFT for " + targetPlayer.getName() + " using metadata: " + metadataKey + "...");
-        targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW + 
+        targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW +
                 "Admin " + player.getName() + " is minting an NFT for you...");
 
-        // Get NFT metadata
-        String nftName = plugin.getConfigManager().getNftName(metadataKey);
-        String nftDescription = plugin.getConfigManager().getNftDescription(metadataKey);
-        String nftImageUrl = plugin.getConfigManager().getNftImageUrl(metadataKey);
+        // Verify NFT metadata exists
+        plugin.getConfigManager().getNftName(metadataKey);
+        plugin.getConfigManager().getNftDescription(metadataKey);
+        plugin.getConfigManager().getNftImageUrl(metadataKey);
 
         // Mint NFT
         CompletableFuture<String> future = plugin.getSolanaService().mintNft(targetPlayer, metadataKey);
@@ -121,7 +117,7 @@ public class MintNFTCommand implements CommandExecutor {
                 // Send success message
                 String successMessage = plugin.getConfigManager().getMessage("nft_minted")
                         .replace("%tx_id%", transactionId);
-                player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.GREEN + 
+                player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.GREEN +
                         "Successfully minted NFT for " + targetPlayer.getName() + "!");
                 player.sendMessage(plugin.getConfigManager().getMessage("prefix") + successMessage);
                 targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") + successMessage);
@@ -129,22 +125,14 @@ public class MintNFTCommand implements CommandExecutor {
                 // Create NFT item using the same method as achievements
                 ItemStack nftItem = createNftItemFromMetadata(transactionId, metadataKey);
 
-                // Give item to player
-                HashMap<Integer, ItemStack> leftover = targetPlayer.getInventory().addItem(nftItem);
+                // Add NFT to player's NFT inventory
+                addNftToPlayerInventory(targetPlayer, nftItem);
 
-                if (leftover.isEmpty()) {
-                    targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                            ChatColor.GREEN + "You received an NFT item for '" + metadataKey + "'!");
-                    player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                            ChatColor.GREEN + "NFT item given to " + targetPlayer.getName() + ".");
-                } else {
-                    // Drop the item at player's feet if inventory is full
-                    targetPlayer.getWorld().dropItem(targetPlayer.getLocation(), nftItem);
-                    targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                            ChatColor.YELLOW + "Your inventory is full. NFT item dropped at your feet.");
-                    player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                            ChatColor.YELLOW + targetPlayer.getName() + "'s inventory was full. NFT item dropped at their location.");
-                }
+                // Send success messages
+                targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                        ChatColor.GREEN + "You received an NFT item for '" + metadataKey + "'! Check your /nftinv");
+                player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                        ChatColor.GREEN + "NFT item added to " + targetPlayer.getName() + "'s NFT inventory.");
 
                 // Log the mint
                 plugin.getLogger().info("Admin " + player.getName() + " minted NFT for player " + targetPlayer.getName());
@@ -178,37 +166,37 @@ public class MintNFTCommand implements CommandExecutor {
             // Get metadata file path
             String metadataPath = "metadata/" + achievementKey + ".json";
             File metadataFile = new File(plugin.getDataFolder(), metadataPath);
-            
+
             if (!metadataFile.exists()) {
                 plugin.getLogger().warning("Metadata file not found: " + metadataPath);
                 // Fallback to ItemManager
                 return plugin.getItemManager().createNftItem(transactionId, achievementKey);
             }
-            
+
             // Parse metadata file
             Gson gson = new Gson();
             Reader reader = new FileReader(metadataFile);
             JsonObject metadata = gson.fromJson(reader, JsonObject.class);
             reader.close();
-            
+
             // Check if metadata has reward section
             JsonObject reward = null;
-            
+
             // First check for reward at top level
             if (metadata.has("reward")) {
                 reward = metadata.getAsJsonObject("reward");
-            } 
+            }
             // Then check in quest section
             else if (metadata.has("quest") && metadata.getAsJsonObject("quest").has("reward")) {
                 reward = metadata.getAsJsonObject("quest").getAsJsonObject("reward");
             }
-            
+
             if (reward == null) {
                 plugin.getLogger().warning("Metadata file does not have reward section: " + metadataPath);
                 // Fallback to ItemManager
                 return plugin.getItemManager().createNftItem(transactionId, achievementKey);
             }
-            
+
             // Create item
             return createItemFromReward(reward, transactionId, achievementKey);
         } catch (Exception e) {
@@ -218,7 +206,29 @@ public class MintNFTCommand implements CommandExecutor {
             return plugin.getItemManager().createNftItem(transactionId, achievementKey);
         }
     }
-    
+
+    /**
+     * Add an NFT to a player's NFT inventory
+     * @param player The player
+     * @param nftItem The NFT item
+     */
+    private void addNftToPlayerInventory(Player player, ItemStack nftItem) {
+        // Find the first available slot in the NFT inventory
+        Map<Integer, ItemStack> nftInventory = plugin.getSimpleNFTInventory().loadInventory(player);
+
+        // Find the first empty slot
+        int slot = 0;
+        while (nftInventory.containsKey(slot)) {
+            slot++;
+        }
+
+        // Add the NFT to the inventory
+        plugin.getSimpleNFTInventory().setItem(player, slot, nftItem);
+        plugin.getSimpleNFTInventory().saveInventory(player);
+
+        plugin.getLogger().info("Added NFT to " + player.getName() + "'s NFT inventory at slot " + slot);
+    }
+
     /**
      * Create an item from reward JSON
      * @param reward The reward JSON object
@@ -230,49 +240,49 @@ public class MintNFTCommand implements CommandExecutor {
         // Get material
         String materialName = reward.has("item") ? reward.get("item").getAsString() : "PAPER";
         Material material = Material.valueOf(materialName);
-        
+
         // Create item
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        
+
         if (meta != null) {
             // Set name
             if (reward.has("name")) {
                 String name = reward.get("name").getAsString();
                 meta.setDisplayName(name); // Already includes color codes
             }
-            
+
             // Set lore
             if (reward.has("lore") && reward.get("lore").isJsonArray()) {
                 List<String> lore = new ArrayList<>();
                 JsonArray loreArray = reward.getAsJsonArray("lore");
-                
+
                 for (JsonElement element : loreArray) {
                     lore.add(element.getAsString());
                 }
-                
+
                 // Add transaction ID to lore
                 lore.add("");
                 lore.add(ChatColor.GRAY + "Transaction: " + ChatColor.WHITE + transactionId);
-                lore.add(ChatColor.BLUE + "" + ChatColor.UNDERLINE + 
+                lore.add(ChatColor.BLUE + "" + ChatColor.UNDERLINE +
                         "https://explorer.solana.com/address/" + transactionId + "?cluster=devnet");
-                
+
                 meta.setLore(lore);
             }
-            
+
             // Set enchantments
             if (reward.has("enchantments") && reward.get("enchantments").isJsonArray()) {
                 JsonArray enchantments = reward.getAsJsonArray("enchantments");
-                
+
                 for (JsonElement element : enchantments) {
                     String enchantmentStr = element.getAsString();
                     String[] parts = enchantmentStr.split(":");
-                    
+
                     if (parts.length == 2) {
                         try {
                             String enchantName = parts[0];
                             int level = Integer.parseInt(parts[1]);
-                            
+
                             // Try to get enchantment
                             Enchantment enchantment = null;
                             try {
@@ -287,7 +297,7 @@ public class MintNFTCommand implements CommandExecutor {
                                     }
                                 }
                             }
-                            
+
                             if (enchantment != null) {
                                 meta.addEnchant(enchantment, level, true);
                             }
@@ -297,39 +307,39 @@ public class MintNFTCommand implements CommandExecutor {
                     }
                 }
             }
-            
+
             // Set unbreakable
             if (reward.has("unbreakable")) {
                 meta.setUnbreakable(reward.get("unbreakable").getAsBoolean());
             }
-            
+
             // Set custom model data
             if (reward.has("custom_model_data")) {
                 meta.setCustomModelData(reward.get("custom_model_data").getAsInt());
             }
-            
+
             // Add item flags
             if (reward.has("glowing") && reward.get("glowing").getAsBoolean()) {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
-            
+
             // Add other item flags
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
-            
+
             // Add NFT data
             PersistentDataContainer container = meta.getPersistentDataContainer();
             NamespacedKey nftKey = new NamespacedKey(plugin, "nft");
             NamespacedKey nftIdKey = new NamespacedKey(plugin, "nft_id");
             NamespacedKey achievementKeyNS = new NamespacedKey(plugin, "achievement_key");
-            
+
             container.set(nftKey, PersistentDataType.BYTE, (byte) 1);
             container.set(nftIdKey, PersistentDataType.STRING, transactionId);
             container.set(achievementKeyNS, PersistentDataType.STRING, achievementKey);
-            
+
             // Apply meta to item
             item.setItemMeta(meta);
         }
-        
+
         return item;
     }
 }
