@@ -1,16 +1,28 @@
 # ✨ Minecraft NFT Plugin ✨
 
-A Solana NFT integration plugin for Minecraft, allowing players to receive NFTs when they achieve specific in-game accomplishments. This plugin creates a seamless bridge between Minecraft gameplay and Solana blockchain technology.
+A comprehensive Solana NFT integration plugin for Minecraft, allowing players to receive, store, and use NFTs with special abilities in-game. This plugin creates a seamless bridge between Minecraft gameplay and Solana blockchain technology, enhancing player experience with unique collectible items.
+
+<div align="center">
+
+[<kbd>Download Latest Release</kbd>](https://github.com/Woft257/nft-plugin/releases) &nbsp;&nbsp;&nbsp;
+[<kbd>View Documentation</kbd>](https://github.com/Woft257/nft-plugin/wiki) &nbsp;&nbsp;&nbsp;
+[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new)
+
+</div>
 
 ## ✅ Features
 
-- **Mint NFTs on Solana DevNet** when players achieve in-game accomplishments
+- **Mint NFTs on Solana** when players achieve in-game accomplishments
+- **Virtual NFT Inventory** with unlimited pagination for storing and managing NFTs
+- **Functional NFT Items** with special abilities:
+  - **Explosion Pickaxes** (Levels 1-5): Mine in 3x3 to 7x7 areas
+  - **Laser Pickaxes** (Levels 1-5): Mine up to 6 blocks deep
+  - **Lucky Charms** (Levels 1-20): Increase rare item drop rates
 - **SolanaLogin Integration** to link Solana wallets with Minecraft accounts
-- **Flexible Achievement System** based on holding specially named items
-- **Easy Configuration** through config.yml and JSON metadata files
-- **Add New Achievements** without recompiling the plugin
+- **Lootbox System** with tiered rarity (Common, Rare, Epic, Legendary, Mythic)
+- **NFT Fusion System** to combine lower-tier NFTs into higher-tier ones
+- **Admin Commands** for minting NFTs and managing player inventories
 - **Enhanced NFT Display** with compact and user-friendly information
-- **NFT List Command** with pagination for browsing all your NFTs
 - **Interactive UI** with clickable buttons for Solana Explorer and image links
 - **Visual Enhancements** for better user experience
 
@@ -156,31 +168,63 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achiev
 
 ## 💬 Commands
 
+### Player Commands
 - `/nftinfo` - Display information about the NFT item currently held in hand
 - `/nftlist` - View a list of all your NFTs with pagination
+- `/nftinv` - Open your virtual NFT inventory to store and manage NFTs
+
+### Admin Commands
 - `/resetnft <player>` - Reset a player's achievement and NFT progress (Admin only)
-- `/mintnft <player> <achievement_key>` - Manually mint an NFT for a player (Admin only)
+- `/mintnft <player> <metadata_key>` - Manually mint an NFT for a player (Admin only)
+- `/nftbuff <player>` - View a player's active NFT buffs and their values (Admin only)
 
 ## 📖 Usage Guide
 
+### For Players
+
 1. **Register Solana Wallet**:
-   - Players need to register their Solana wallet using the SolanaLogin plugin
-   - Use the command `/connectwallet <wallet_address>` from the SolanaLogin plugin
+   - Register your Solana wallet using the SolanaLogin plugin
+   - Use the command `/connectwallet <wallet_address>`
 
-2. **Achieve Accomplishments**:
-   - Players need to find and hold specially named items
-   - When holding the item, the plugin will automatically mint an NFT and send it to the player's Solana wallet
-   - The original item will be removed and replaced with an in-game NFT item
+2. **Obtain NFTs**:
+   - Complete in-game achievements to earn NFTs
+   - NFTs will be minted on the Solana blockchain and added to your virtual inventory
+   - Use `/nftinv` to access your NFT inventory
 
-3. **View NFT Information**:
-   - Hold the NFT item and use the `/nftinfo` command
-   - Detailed information about the NFT will be displayed, including clickable links to Solana Explorer
-   - The information is displayed in a compact and user-friendly format
+3. **Use NFT Abilities**:
+   - **Explosion Pickaxes**: Mine blocks in a square area (3x3 to 7x7)
+   - **Laser Pickaxes**: Mine blocks in depth (2 to 6 blocks deep)
+   - **Lucky Charms**: Increase your chance of finding rare items
 
-4. **Browse Your NFT Collection**:
-   - Use the `/nftlist` command to open an inventory with all your NFTs
-   - Navigate through pages using the arrow buttons if you have many NFTs
-   - Click on any NFT to view detailed information about it
+4. **View NFT Information**:
+   - Hold an NFT item and use `/nftinfo` to see detailed information
+   - Use `/nftlist` to browse all your NFTs with pagination
+
+### For Admins
+
+1. **Mint NFTs for Players**:
+   - Use `/mintnft <player> <metadata_key>` to mint an NFT for a player
+   - The NFT will be added directly to the player's virtual inventory
+
+2. **Check Player Buffs**:
+   - Use `/nftbuff <player>` to view a player's active NFT buffs
+   - This shows exact numeric values without percentage symbols
+
+3. **Reset Player Progress**:
+   - Use `/resetnft <player>` to reset a player's NFT progress
+   - This will remove all NFTs from their inventory and database records
+
+## 🎮 NFT Rarity System
+
+NFTs are categorized into 5 rarity tiers with different drop rates:
+
+1. 🍃 **Common** (60%): Basic NFTs with minor buffs
+2. 🍀 **Rare** (25%): Uncommon NFTs with moderate buffs
+3. 🔥 **Epic** (10%): Powerful NFTs with significant buffs
+4. 💎 **Legendary** (4%): Very rare NFTs with major buffs
+5. 🌀 **Mythic** (1%): Extremely rare NFTs with exceptional buffs
+
+For detailed information about the NFT rarity system and lootboxes, see [NFT-Lootbox-System.md](NFT-Lootbox-System.md).
 
 ## 🔧 Troubleshooting
 
@@ -227,57 +271,34 @@ node mint-nft.js \
   --achievement "test_achievement"
 ```
 
-## ✨ Adding New Achievements
+## ✨ Adding New NFTs
 
-To add a new achievement:
+To add a new NFT:
 
 1. **Create a Metadata File**:
    - Create a new JSON file in the `plugins/NFTPlugin/metadata/` directory
-   - Name the file according to the format `<achievement_key>.json`
+   - Name the file according to the format `<nft_key>.json`
+   - Include all necessary fields: name, description, image, attributes, and quest
 
-2. **Update config.yml**:
-   - Add a new entry in the `achievements` section of the `config.yml` file
+2. **Restart the Server**:
+   - The plugin will automatically detect and load the new NFT metadata
+   - No need to modify config.yml for new NFTs
 
-Example for adding a "Diamond Sword" achievement:
+### NFT Abilities Troubleshooting
 
-**diamond_sword.json**:
-```json
-{
-  "name": "Diamond Sword of Power",
-  "description": "A legendary diamond sword with immense power",
-  "image": "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreifri6u3f3ww7u6v2gkkcfsol2ijqbno5qmc77n5h57hytebvtr6n4",
-  "attributes": [
-    {
-      "trait_type": "Type",
-      "value": "Weapon"
-    },
-    {
-      "trait_type": "Rarity",
-      "value": "Legendary"
-    }
-  ],
-  "quest": {
-    "type": "HOLD_NAMED_ITEM_INSTANT",
-    "target": "DIAMOND_SWORD",
-    "target_name": "Sword of Power",
-    "duration": 0,
-    "description": "Hold a Diamond Sword named 'Sword of Power'"
-  }
-}
-```
+If NFT abilities like explosion mining or laser mining aren't working:
 
-**Update config.yml**:
-```yaml
-achievements:
-  # Existing achievements...
+1. **Check Permissions**:
+   - Ensure the player has the `nftplugin.use.abilities` permission
+   - Add the permission with: `/lp user <player> permission set nftplugin.use.abilities true`
 
-  # Diamond Sword
-  diamond_sword:
-    enabled: true
-    type: named_item
-    material: DIAMOND_SWORD
-    item_name: "Sword of Power"
-```
+2. **Verify Configuration**:
+   - Make sure abilities are enabled in the config.yml file
+   - Check that the NFT metadata file has the correct enchantment entries
+
+3. **Debug Mode**:
+   - Enable debug mode in config.yml to see detailed logs
+   - Check the console for any error messages related to NFT abilities
 
 ## 🔐 License
 
@@ -293,6 +314,6 @@ If you have any questions or encounter issues, please create an issue on GitHub 
 
 ### ⭐ Enjoy using the Minecraft NFT Plugin! ⭐
 
-[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/Woft257/nft-plugin/issues/new?labels=enhancement)
+[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/Woft257/nft-plugin/issues/new?labels=enhancement) &nbsp;&nbsp;&nbsp; [<kbd>View on GitHub</kbd>](https://github.com/Woft257/nft-plugin)
 
 </div>

@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Command to mint an NFT directly to a specified player
@@ -36,6 +38,12 @@ import java.util.concurrent.CompletableFuture;
 public class MintNFTCommand implements CommandExecutor {
 
     private final NFTPlugin plugin;
+
+    // Cache for metadata JSON objects to avoid repeated file reads
+    private final Map<String, JsonObject> metadataCache = new ConcurrentHashMap<>();
+
+    // Cache for reward objects to avoid repeated parsing
+    private final Map<String, JsonObject> rewardCache = new ConcurrentHashMap<>();
 
     /**
      * Constructor
@@ -97,13 +105,11 @@ public class MintNFTCommand implements CommandExecutor {
             return true;
         }
 
-        // Inform player
+        // Only inform admin, not the target player
         player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW +
                 "Minting NFT for " + targetPlayer.getName() + " using metadata: " + metadataKey + "...");
-        targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.YELLOW +
-                "Admin " + player.getName() + " is minting an NFT for you...");
 
-        // Verify NFT metadata exists
+        // Verify NFT metadata exists (but don't store the values to avoid unnecessary operations)
         plugin.getConfigManager().getNftName(metadataKey);
         plugin.getConfigManager().getNftDescription(metadataKey);
         plugin.getConfigManager().getNftImageUrl(metadataKey);
@@ -114,13 +120,12 @@ public class MintNFTCommand implements CommandExecutor {
         // Handle result
         future.thenAccept(transactionId -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                // Send success message
+                // Send success message only to admin
                 String successMessage = plugin.getConfigManager().getMessage("nft_minted")
                         .replace("%tx_id%", transactionId);
                 player.sendMessage(plugin.getConfigManager().getMessage("prefix") + ChatColor.GREEN +
                         "Successfully minted NFT for " + targetPlayer.getName() + "!");
                 player.sendMessage(plugin.getConfigManager().getMessage("prefix") + successMessage);
-                targetPlayer.sendMessage(plugin.getConfigManager().getMessage("prefix") + successMessage);
 
                 // Create NFT item using the same method as achievements
                 ItemStack nftItem = createNftItemFromMetadata(transactionId, metadataKey);
@@ -156,59 +161,71 @@ public class MintNFTCommand implements CommandExecutor {
     }
 
     /**
-     * Create an NFT item from metadata file
+     * Create an NFT item from metadata file (optimized with caching)
      * @param transactionId The transaction ID
      * @param achievementKey The achievement key
      * @return The NFT item
      */
     private ItemStack createNftItemFromMetadata(String transactionId, String achievementKey) {
         try {
-            // Get metadata file path
-            String metadataPath = "metadata/" + achievementKey + ".json";
-            File metadataFile = new File(plugin.getDataFolder(), metadataPath);
-
-            if (!metadataFile.exists()) {
-                plugin.getLogger().warning("Metadata file not found: " + metadataPath);
-                // Fallback to ItemManager
-                return plugin.getItemManager().createNftItem(transactionId, achievementKey);
-            }
-
-            // Parse metadata file
-            Gson gson = new Gson();
-            Reader reader = new FileReader(metadataFile);
-            JsonObject metadata = gson.fromJson(reader, JsonObject.class);
-            reader.close();
-
-            // Check if metadata has reward section
-            JsonObject reward = null;
-
-            // First check for reward at top level
-            if (metadata.has("reward")) {
-                reward = metadata.getAsJsonObject("reward");
-            }
-            // Then check in quest section
-            else if (metadata.has("quest") && metadata.getAsJsonObject("quest").has("reward")) {
-                reward = metadata.getAsJsonObject("quest").getAsJsonObject("reward");
-            }
+            // Check if we already have the reward in cache
+            JsonObject reward = rewardCache.get(achievementKey);
 
             if (reward == null) {
-                plugin.getLogger().warning("Metadata file does not have reward section: " + metadataPath);
-                // Fallback to ItemManager
-                return plugin.getItemManager().createNftItem(transactionId, achievementKey);
+                // Get metadata file path
+                String metadataPath = "metadata/" + achievementKey + ".json";
+                File metadataFile = new File(plugin.getDataFolder(), metadataPath);
+
+                if (!metadataFile.exists()) {
+                    plugin.getLogger().warning("Metadata file not found: " + metadataPath);
+                    // Fallback to ItemManager
+                    return plugin.getItemManager().createNftItem(transactionId, achievementKey);
+                }
+
+                // Check if we have the metadata in cache
+                JsonObject metadata = metadataCache.get(achievementKey);
+
+                if (metadata == null) {
+                    // Parse metadata file
+                    Gson gson = new Gson();
+                    try (Reader reader = new FileReader(metadataFile)) {
+                        metadata = gson.fromJson(reader, JsonObject.class);
+                        // Store in cache for future use
+                        metadataCache.put(achievementKey, metadata);
+                    }
+                }
+
+                // Extract reward section
+                // First check for reward at top level
+                if (metadata.has("reward")) {
+                    reward = metadata.getAsJsonObject("reward");
+                }
+                // Then check in quest section
+                else if (metadata.has("quest") && metadata.getAsJsonObject("quest").has("reward")) {
+                    reward = metadata.getAsJsonObject("quest").getAsJsonObject("reward");
+                }
+
+                if (reward == null) {
+                    plugin.getLogger().warning("Metadata file does not have reward section: " + metadataPath);
+                    // Fallback to ItemManager
+                    return plugin.getItemManager().createNftItem(transactionId, achievementKey);
+                }
+
+                // Store reward in cache for future use
+                rewardCache.put(achievementKey, reward);
             }
 
             // Create item
             return createItemFromReward(reward, transactionId, achievementKey);
         } catch (Exception e) {
             plugin.getLogger().severe("Error creating NFT item from metadata: " + e.getMessage());
-            e.printStackTrace();
-            // Fallback to ItemManager
+            // Fallback to ItemManager without stack trace for speed
             return plugin.getItemManager().createNftItem(transactionId, achievementKey);
         }
     }
 
     /**
-     * Add an NFT to a player's NFT inventory
+     * Add an NFT to a player's NFT inventory (optimized)
      * @param player The player
      * @param nftItem The NFT item
      */
@@ -216,130 +233,172 @@ public class MintNFTCommand implements CommandExecutor {
         // Find the first available slot in the NFT inventory
         Map<Integer, ItemStack> nftInventory = plugin.getSimpleNFTInventory().loadInventory(player);
 
-        // Find the first empty slot
-        int slot = 0;
-        while (nftInventory.containsKey(slot)) {
-            slot++;
+        // Find the first empty slot (optimized)
+        final int slot;
+        // Check the first 100 slots to find an empty one quickly
+        int emptySlot = 0;
+        for (int i = 0; i < 100; i++) {
+            if (!nftInventory.containsKey(i)) {
+                emptySlot = i;
+                break;
+            }
         }
+        slot = emptySlot; // Make it effectively final
 
         // Add the NFT to the inventory
         plugin.getSimpleNFTInventory().setItem(player, slot, nftItem);
-        plugin.getSimpleNFTInventory().saveInventory(player);
 
-        plugin.getLogger().info("Added NFT to " + player.getName() + "'s NFT inventory at slot " + slot);
+        // Save inventory asynchronously to avoid blocking the main thread
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getSimpleNFTInventory().saveInventory(player);
+            plugin.getLogger().info("Added NFT to " + player.getName() + "'s NFT inventory at slot " + slot);
+        });
     }
 
     /**
-     * Create an item from reward JSON
+     * Create an item from reward JSON (optimized)
      * @param reward The reward JSON object
      * @param transactionId The transaction ID
      * @param achievementKey The achievement key
      * @return The item
      */
     private ItemStack createItemFromReward(JsonObject reward, String transactionId, String achievementKey) {
-        // Get material
-        String materialName = reward.has("item") ? reward.get("item").getAsString() : "PAPER";
-        Material material = Material.valueOf(materialName);
-
-        // Create item
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-
-        if (meta != null) {
-            // Set name
-            if (reward.has("name")) {
-                String name = reward.get("name").getAsString();
-                meta.setDisplayName(name); // Already includes color codes
+        try {
+            // Get material (with fallback)
+            Material material;
+            try {
+                String materialName = reward.has("item") ? reward.get("item").getAsString() : "DIAMOND_PICKAXE";
+                material = Material.valueOf(materialName);
+            } catch (Exception e) {
+                // Fallback to a safe material
+                material = Material.DIAMOND_PICKAXE;
             }
 
-            // Set lore
-            if (reward.has("lore") && reward.get("lore").isJsonArray()) {
-                List<String> lore = new ArrayList<>();
-                JsonArray loreArray = reward.getAsJsonArray("lore");
+            // Create item
+            ItemStack item = new ItemStack(material);
+            ItemMeta meta = item.getItemMeta();
 
-                for (JsonElement element : loreArray) {
-                    lore.add(element.getAsString());
+            if (meta != null) {
+                // Set name (with fallback)
+                if (reward.has("name")) {
+                    try {
+                        String name = reward.get("name").getAsString();
+                        meta.setDisplayName(name); // Already includes color codes
+                    } catch (Exception e) {
+                        meta.setDisplayName(ChatColor.GOLD + "NFT " + ChatColor.AQUA + achievementKey);
+                    }
+                } else {
+                    meta.setDisplayName(ChatColor.GOLD + "NFT " + ChatColor.AQUA + achievementKey);
+                }
+
+                // Set lore (optimized)
+                List<String> lore = new ArrayList<>();
+
+                // Add basic lore if not present in reward
+                if (!reward.has("lore") || !reward.get("lore").isJsonArray()) {
+                    lore.add(ChatColor.GRAY + "A special NFT item");
+                    lore.add(ChatColor.GRAY + "Achievement: " + ChatColor.WHITE + achievementKey);
+                } else {
+                    // Add lore from reward
+                    try {
+                        JsonArray loreArray = reward.getAsJsonArray("lore");
+                        for (JsonElement element : loreArray) {
+                            lore.add(element.getAsString());
+                        }
+                    } catch (Exception e) {
+                        lore.add(ChatColor.GRAY + "A special NFT item");
+                        lore.add(ChatColor.GRAY + "Achievement: " + ChatColor.WHITE + achievementKey);
+                    }
                 }
 
                 // Add transaction ID to lore
                 lore.add("");
                 lore.add(ChatColor.GRAY + "Transaction: " + ChatColor.WHITE + transactionId);
-                lore.add(ChatColor.BLUE + "" + ChatColor.UNDERLINE +
-                        "https://explorer.solana.com/address/" + transactionId + "?cluster=devnet");
 
+                // Set the lore
                 meta.setLore(lore);
-            }
 
-            // Set enchantments
-            if (reward.has("enchantments") && reward.get("enchantments").isJsonArray()) {
-                JsonArray enchantments = reward.getAsJsonArray("enchantments");
+                // Set enchantments (optimized)
+                if (reward.has("enchantments") && reward.get("enchantments").isJsonArray()) {
+                    try {
+                        JsonArray enchantments = reward.getAsJsonArray("enchantments");
+                        for (JsonElement element : enchantments) {
+                            String enchantmentStr = element.getAsString();
+                            String[] parts = enchantmentStr.split(":");
 
-                for (JsonElement element : enchantments) {
-                    String enchantmentStr = element.getAsString();
-                    String[] parts = enchantmentStr.split(":");
+                            if (parts.length == 2) {
+                                try {
+                                    String enchantName = parts[0];
+                                    int level = Integer.parseInt(parts[1]);
 
-                    if (parts.length == 2) {
-                        try {
-                            String enchantName = parts[0];
-                            int level = Integer.parseInt(parts[1]);
-
-                            // Try to get enchantment
-                            Enchantment enchantment = null;
-                            try {
-                                enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantName.toLowerCase()));
-                            } catch (Exception ex) {
-                                // Try to find enchantment by name (case insensitive)
-                                for (Enchantment ench : Enchantment.values()) {
-                                    if (ench.getKey().getKey().equalsIgnoreCase(enchantName) ||
-                                        ench.getKey().toString().equalsIgnoreCase(enchantName)) {
-                                        enchantment = ench;
-                                        break;
+                                    // Try to get enchantment by key directly
+                                    Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantName.toLowerCase()));
+                                    if (enchantment != null) {
+                                        meta.addEnchant(enchantment, level, true);
                                     }
+                                } catch (Exception ignored) {
+                                    // Skip this enchantment if it fails
                                 }
                             }
-
-                            if (enchantment != null) {
-                                meta.addEnchant(enchantment, level, true);
-                            }
-                        } catch (Exception e) {
-                            plugin.getLogger().warning("Error adding enchantment: " + enchantmentStr);
                         }
+                    } catch (Exception ignored) {
+                        // If enchantments fail, add some default ones
+                        meta.addEnchant(Enchantment.DURABILITY, 10, true);
+                        meta.addEnchant(Enchantment.DIG_SPEED, 5, true);
                     }
+                } else {
+                    // Add default enchantments
+                    meta.addEnchant(Enchantment.DURABILITY, 10, true);
+                    meta.addEnchant(Enchantment.DIG_SPEED, 5, true);
                 }
+
+                // Set unbreakable
+                meta.setUnbreakable(true);
+
+                // Add item flags
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+
+                // Add NFT data
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                NamespacedKey nftKey = new NamespacedKey(plugin, "nft");
+                NamespacedKey nftIdKey = new NamespacedKey(plugin, "nft_id");
+                NamespacedKey achievementKeyNS = new NamespacedKey(plugin, "achievement_key");
+
+                container.set(nftKey, PersistentDataType.BYTE, (byte) 1);
+                container.set(nftIdKey, PersistentDataType.STRING, transactionId);
+                container.set(achievementKeyNS, PersistentDataType.STRING, achievementKey);
+
+                // Apply meta to item
+                item.setItemMeta(meta);
             }
 
-            // Set unbreakable
-            if (reward.has("unbreakable")) {
-                meta.setUnbreakable(reward.get("unbreakable").getAsBoolean());
+            return item;
+        } catch (Exception e) {
+            // If anything fails, create a simple fallback item
+            ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ChatColor.GOLD + "NFT " + ChatColor.AQUA + achievementKey);
+                List<String> lore = new ArrayList<>();
+                lore.add(ChatColor.GRAY + "A special NFT item");
+                lore.add(ChatColor.GRAY + "Transaction: " + ChatColor.WHITE + transactionId);
+                meta.setLore(lore);
+                meta.setUnbreakable(true);
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+
+                // Add NFT data
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                NamespacedKey nftKey = new NamespacedKey(plugin, "nft");
+                NamespacedKey nftIdKey = new NamespacedKey(plugin, "nft_id");
+                NamespacedKey achievementKeyNS = new NamespacedKey(plugin, "achievement_key");
+
+                container.set(nftKey, PersistentDataType.BYTE, (byte) 1);
+                container.set(nftIdKey, PersistentDataType.STRING, transactionId);
+                container.set(achievementKeyNS, PersistentDataType.STRING, achievementKey);
+
+                item.setItemMeta(meta);
             }
-
-            // Set custom model data
-            if (reward.has("custom_model_data")) {
-                meta.setCustomModelData(reward.get("custom_model_data").getAsInt());
-            }
-
-            // Add item flags
-            if (reward.has("glowing") && reward.get("glowing").getAsBoolean()) {
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-
-            // Add other item flags
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
-
-            // Add NFT data
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            NamespacedKey nftKey = new NamespacedKey(plugin, "nft");
-            NamespacedKey nftIdKey = new NamespacedKey(plugin, "nft_id");
-            NamespacedKey achievementKeyNS = new NamespacedKey(plugin, "achievement_key");
-
-            container.set(nftKey, PersistentDataType.BYTE, (byte) 1);
-            container.set(nftIdKey, PersistentDataType.STRING, transactionId);
-            container.set(achievementKeyNS, PersistentDataType.STRING, achievementKey);
-
-            // Apply meta to item
-            item.setItemMeta(meta);
+            return item;
         }
-
-        return item;
     }
 }
