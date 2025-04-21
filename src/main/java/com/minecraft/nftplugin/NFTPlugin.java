@@ -4,9 +4,10 @@ import com.minecraft.nftplugin.achievements.AchievementManager;
 import com.minecraft.nftplugin.commands.MintNFTCommand;
 import com.minecraft.nftplugin.commands.NFTBuffCommand;
 import com.minecraft.nftplugin.commands.NFTInfoCommand;
-import com.minecraft.nftplugin.commands.NFTInventoryCommand;
+import com.minecraft.nftplugin.commands.NFTInvCommand;
 import com.minecraft.nftplugin.commands.NFTListCommand;
 import com.minecraft.nftplugin.commands.ResetNFTCommand;
+import com.minecraft.nftplugin.commands.TestCommand;
 import com.minecraft.nftplugin.database.DatabaseManager;
 
 import com.minecraft.nftplugin.integration.SolanaLoginIntegration;
@@ -18,6 +19,8 @@ import com.minecraft.nftplugin.listeners.InventoryListener;
 import com.minecraft.nftplugin.listeners.PlayerListener;
 import com.minecraft.nftplugin.metadata.MetadataManager;
 import com.minecraft.nftplugin.solana.SolanaService;
+// import com.minecraft.nftplugin.storage.NFTInventoryStorage;
+import com.minecraft.nftplugin.storage.SimpleNFTInventory;
 import com.minecraft.nftplugin.utils.ConfigManager;
 import com.minecraft.nftplugin.utils.ItemManager;
 import org.bukkit.Bukkit;
@@ -38,6 +41,7 @@ public class NFTPlugin extends JavaPlugin {
     private MetadataManager metadataManager;
     private CustomEnchantManager customEnchantManager;
     private BuffManager buffManager;
+    private SimpleNFTInventory simpleNFTInventory;
 
 
     @Override
@@ -81,18 +85,42 @@ public class NFTPlugin extends JavaPlugin {
         // Initialize buff manager
         buffManager = new BuffManager(this);
 
+        // Initialize simple NFT inventory
+        simpleNFTInventory = new SimpleNFTInventory(this);
+
         // Initialize achievement manager
         achievementManager = new AchievementManager(this);
         achievementManager.initializeAchievements();
 
         // Register commands
-        getCommand("nftinfo").setExecutor(new NFTInfoCommand(this));
-        getCommand("nftlist").setExecutor(new NFTListCommand(this));
-        getCommand("nftinventory").setExecutor(new NFTInventoryCommand(this));
+        getLogger().info("Registering commands...");
+        try {
+            getCommand("nftinfo").setExecutor(new NFTInfoCommand(this));
+            getLogger().info("Registered nftinfo command");
 
-        getCommand("resetnft").setExecutor(new ResetNFTCommand(this));
-        getCommand("mintnft").setExecutor(new MintNFTCommand(this));
-        getCommand("nftbuff").setExecutor(new NFTBuffCommand(this));
+            getCommand("nftlist").setExecutor(new NFTListCommand(this));
+            getLogger().info("Registered nftlist command");
+
+            // Removed nftinventory command
+
+            getCommand("resetnft").setExecutor(new ResetNFTCommand(this));
+            getLogger().info("Registered resetnft command");
+
+            getCommand("mintnft").setExecutor(new MintNFTCommand(this));
+            getLogger().info("Registered mintnft command");
+
+            getCommand("nftbuff").setExecutor(new NFTBuffCommand(this));
+            getLogger().info("Registered nftbuff command");
+
+            getCommand("test").setExecutor(new TestCommand(this));
+            getLogger().info("Registered test command");
+
+            getCommand("nftinv").setExecutor(new NFTInvCommand(this, simpleNFTInventory));
+            getLogger().info("Registered nftinv command");
+        } catch (Exception e) {
+            getLogger().severe("Error registering commands: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         // Register event listeners
         // Bukkit.getPluginManager().registerEvents(new BlockBreakListener(this), this);
@@ -192,6 +220,15 @@ public class NFTPlugin extends JavaPlugin {
      */
     public BuffManager getBuffManager() {
         return buffManager;
+    }
+
+
+    /**
+     * Get the simple NFT inventory
+     * @return The simple NFT inventory
+     */
+    public SimpleNFTInventory getSimpleNFTInventory() {
+        return simpleNFTInventory;
     }
 
 

@@ -1,6 +1,9 @@
 package com.minecraft.nftplugin.listeners;
 
 import com.minecraft.nftplugin.NFTPlugin;
+import com.minecraft.nftplugin.commands.SimpleNFTInventoryCommand;
+import com.minecraft.nftplugin.commands.NFTInvCommand;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,7 +50,13 @@ public class InventoryListener implements Listener {
         ItemStack cursorItem = event.getCursor();
         ItemStack currentItem = event.getCurrentItem();
         String inventoryTitle = event.getView().getTitle();
-        boolean isNftInventory = inventoryTitle.equals(plugin.getConfigManager().getMessage("prefix").replace("§r", "") + "§5NFT Inventory");
+        boolean isNftInventory = inventoryTitle.equals(SimpleNFTInventoryCommand.INVENTORY_TITLE) || inventoryTitle.startsWith(NFTInvCommand.INVENTORY_TITLE_PREFIX);
+
+        // Handle shift-click separately
+        if (event.isShiftClick()) {
+            handleShiftClick(event, player, isNftInventory);
+            return;
+        }
 
         // Check if the cursor item is an NFT item
         if (cursorItem != null && plugin.getItemManager().isNftItem(cursorItem)) {
@@ -73,7 +82,7 @@ public class InventoryListener implements Listener {
         // Check if the current item is an NFT item
         if (currentItem != null && plugin.getItemManager().isNftItem(currentItem)) {
             // Allow taking from NFT inventory
-            if (isNftInventory) {
+            if (isNftInventory || inventoryTitle.startsWith(NFTInvCommand.INVENTORY_TITLE_PREFIX)) {
                 // This is allowed - taking NFT from NFT inventory
                 return;
             }
@@ -92,6 +101,38 @@ public class InventoryListener implements Listener {
     }
 
     /**
+     * Handle shift-click events specifically
+     */
+    private void handleShiftClick(InventoryClickEvent event, Player player, boolean isNftInventory) {
+        ItemStack currentItem = event.getCurrentItem();
+        if (currentItem == null || currentItem.getType() == Material.AIR) {
+            return; // Nothing to shift-click
+        }
+
+        // If it's an NFT item
+        if (plugin.getItemManager().isNftItem(currentItem)) {
+            // If clicking in player inventory
+            if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.PLAYER) {
+                // Only allow shift-clicking to NFT inventory
+                if (!isNftInventory) {
+                    event.setCancelled(true);
+                    player.sendMessage(plugin.getConfigManager().getMessage("prefix") + "§cYou can only place NFT items in your inventory or NFT inventory!");
+                    plugin.getLogger().info("Blocked shift-click of NFT from player inventory to non-NFT inventory");
+                }
+            }
+            // If clicking in any other inventory
+            else if (event.getClickedInventory() != null && event.getClickedInventory().getType() != InventoryType.PLAYER) {
+                // If not in NFT inventory, block the shift-click
+                if (!isNftInventory) {
+                    event.setCancelled(true);
+                    player.sendMessage(plugin.getConfigManager().getMessage("prefix") + "§cYou can only place NFT items in your inventory or NFT inventory!");
+                    plugin.getLogger().info("Blocked shift-click of NFT from non-NFT inventory");
+                }
+            }
+        }
+    }
+
+    /**
      * Allow players to drag NFT items only to NFT inventory
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -102,7 +143,7 @@ public class InventoryListener implements Listener {
 
         ItemStack item = event.getOldCursor();
         String inventoryTitle = event.getView().getTitle();
-        boolean isNftInventory = inventoryTitle.equals(plugin.getConfigManager().getMessage("prefix").replace("§r", "") + "§5NFT Inventory");
+        boolean isNftInventory = inventoryTitle.equals(SimpleNFTInventoryCommand.INVENTORY_TITLE) || inventoryTitle.startsWith(NFTInvCommand.INVENTORY_TITLE_PREFIX);
 
         if (plugin.getItemManager().isNftItem(item)) {
             // Check if any of the slots are in the top inventory

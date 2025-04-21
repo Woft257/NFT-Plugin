@@ -15,10 +15,7 @@ commands:
     description: View a list of all your NFTs
     usage: /nftlist
     permission: nftplugin.nftinfo
-  nftinventory:
-    description: Open a virtual inventory to view and manage your NFTs
-    usage: /nftinventory [page]
-    permission: nftplugin.nftinfo
+
 
   resetnft:
     description: Reset a player's NFT and achievement progress
@@ -31,6 +28,14 @@ commands:
   nftbuff:
     description: View NFT buffs
     usage: /nftbuff [player]
+    permission: nftplugin.nftinfo
+  test:
+    description: Test command
+    usage: /test
+    permission: nftplugin.nftinfo
+  nftinv:
+    description: Open NFT inventory with pagination
+    usage: /nftinv [page]
     permission: nftplugin.nftinfo
 
 permissions:
