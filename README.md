@@ -4,53 +4,53 @@ A comprehensive Solana NFT integration plugin for Minecraft, allowing players to
 
 <div align="center">
 
-[<kbd>Download Latest Release</kbd>](https://github.com/Woft257/nft-plugin/releases) &nbsp;&nbsp;&nbsp;
-[<kbd>View Documentation</kbd>](https://github.com/Woft257/nft-plugin/wiki) &nbsp;&nbsp;&nbsp;
-[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new)
+![NFT Plugin Banner](https://i.imgur.com/placeholder.png)
 
 </div>
 
 ## ✅ Features
 
-- **Mint NFTs on Solana** when players achieve in-game accomplishments
-- **Virtual NFT Inventory** with unlimited pagination for storing and managing NFTs
-- **Functional NFT Items** with special abilities:
-  - **Explosion Pickaxes** (Levels 1-5): Mine in 3x3 to 7x7 areas
-  - **Laser Pickaxes** (Levels 1-5): Mine up to 6 blocks deep
-  - **Lucky Charms** (Levels 1-20): Increase rare item drop rates
-- **SolanaLogin Integration** to link Solana wallets with Minecraft accounts
-- **Lootbox System** with tiered rarity (Common, Rare, Epic, Legendary, Mythic)
-- **NFT Fusion System** to combine lower-tier NFTs into higher-tier ones
-- **Admin Commands** for minting NFTs and managing player inventories
-- **Enhanced NFT Display** with compact and user-friendly information
-- **Interactive UI** with clickable buttons for Solana Explorer and image links
-- **Visual Enhancements** for better user experience
+- **Solana Blockchain Integration**: Mint NFTs directly on the Solana blockchain when players complete achievements
+- **Achievement System**: Earn NFTs by finding and holding special named items in-game
+- **Virtual NFT Inventory**: Store and manage your NFTs with a paginated inventory system
+- **Custom Enchantments**:
+  - **Explosion Mining** (Levels I-V): Mine in 3x3 to 7x7 areas
+  - **Laser Mining** (Levels I-V): Mine up to 6 blocks deep
+- **Buff System**: Gain special abilities and bonuses from your NFTs
+  - **Lucky Charms**: Increase drop rates for rare items
+- **SolanaLogin Integration**: Securely link your Solana wallet to your Minecraft account
+- **NFT Lootbox System**: Purchase and open lootboxes with different rarity tiers
+- **Admin Commands**: Comprehensive tools for server administrators
+- **Interactive UI**: View NFT details with clickable Solana Explorer links
+- **Database Storage**: Secure MySQL/MariaDB integration for persistent data
 
 ## ⚙️ Requirements
 
-- Minecraft Paper 1.18.2
+- Minecraft Paper/Spigot 1.18+
 - Java 17 or higher
-- Node.js 16 or higher (for Solana backend)
-- SolanaLogin Plugin (for wallet linking)
-- MySQL/MariaDB (for data storage)
+- Node.js 16+ (for Solana backend)
+- SolanaLogin Plugin (optional but recommended)
+- MySQL/MariaDB database
+- Vault (for Lootbox economy integration)
 
 ## 💾 Installation
 
-1. Download the latest JAR file from [<kbd>Download Latest Release</kbd>](https://github.com/Woft257/nft-plugin/releases)
+1. Download the plugin JAR file
 2. Place the JAR file in your Minecraft server's `plugins` directory
 3. Start the server to generate configuration files
 4. Configure the plugin in `plugins/NFTPlugin/config.yml`
-5. Set up the Solana backend:
+5. Set up the database connection in the config file
+6. Set up the Solana backend:
    ```bash
    cd plugins/NFTPlugin/solana-backend
    npm install
    ```
-6. Configure the Solana backend in `plugins/NFTPlugin/solana-backend/.env`
-7. Restart the server
+7. Configure the Solana backend in `.env` file (see below)
+8. Restart the server
 
 ## 🔧 Configuration
 
-### config.yml
+### Main Configuration (config.yml)
 
 ```yaml
 # Database Configuration
@@ -65,7 +65,7 @@ database:
 # Achievement Settings
 achievements:
   # Great Light - Blaze Rod
-  great_light:
+  anh_sang_vi_dai:
     enabled: true
     type: named_item
     material: BLAZE_ROD
@@ -78,17 +78,24 @@ achievements:
     material: PAPER
     item_name: "Ancient Scroll"
 
+  # Diamond Sword - Diamond Sword item
+  diamond_sword:
+    enabled: true
+    type: named_item
+    material: DIAMOND_SWORD
+    item_name: "Sword of Power"
+
 # Solana Settings
 solana:
   network: "devnet"
   rpc_url: "https://api.devnet.solana.com"
-  server_wallet_private_key: "" # Do not fill this in here! Use the SOLANA_PRIVATE_KEY environment variable
+  server_wallet_private_key: "" # DO NOT FILL THIS IN THE CONFIG FILE! Use environment variable instead
   mint_fee: 0.000005
 ```
 
 ### Solana Backend Configuration (.env)
 
-Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory with the following content:
+Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory:
 
 ```
 # Server wallet private key (base58 format)
@@ -114,7 +121,7 @@ RETRY_COUNT=5
 
 Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achievement:
 
-**great_light.json**:
+**anh_sang_vi_dai.json**:
 ```json
 {
   "name": "Great Light Staff",
@@ -128,6 +135,10 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achiev
     {
       "trait_type": "Rarity",
       "value": "Legendary"
+    },
+    {
+      "trait_type": "Enchantment",
+      "value": "Explosion Mining III"
     }
   ],
   "quest": {
@@ -154,6 +165,10 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achiev
     {
       "trait_type": "Rarity",
       "value": "Epic"
+    },
+    {
+      "trait_type": "Buff",
+      "value": "Lucky Charm +5%"
     }
   ],
   "quest": {
@@ -171,81 +186,119 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each achiev
 ### Player Commands
 - `/nftinfo` - Display information about the NFT item currently held in hand
 - `/nftlist` - View a list of all your NFTs with pagination
-- `/nftinv` - Open your virtual NFT inventory to store and manage NFTs
+- `/nftinv [page]` - Open your virtual NFT inventory to store and manage NFTs
+- `/nftbuff` - View your active NFT buffs and their values
 
 ### Admin Commands
-- `/resetnft <player>` - Reset a player's achievement and NFT progress (Admin only)
-- `/mintnft <player> <metadata_key>` - Manually mint an NFT for a player (Admin only)
-- `/nftbuff <player>` - View a player's active NFT buffs and their values (Admin only)
+- `/resetnft <player> [achievement_key]` - Reset a player's achievement and NFT progress
+- `/mintnft <username> <metadata_key>` - Manually mint an NFT for a player
+- `/nftbuff [player]` - View a player's active NFT buffs and their values
+- `/test` - Test command for debugging purposes
+
+### Lootbox Commands
+- `/nftlootbox <type> <amount>` - Purchase NFT lootboxes (requires Vault)
+  - Types: basic_nft, premium_nft, ultimate_nft
 
 ## 📖 Usage Guide
 
 ### For Players
 
-1. **Register Solana Wallet**:
-   - Register your Solana wallet using the SolanaLogin plugin
-   - Use the command `/connectwallet <wallet_address>`
+1. **Register Your Solana Wallet**:
+   - Install the SolanaLogin plugin on your server
+   - Use `/connectwallet <wallet_address>` to link your Solana wallet
+   - This allows you to receive NFTs on the Solana blockchain
 
-2. **Obtain NFTs**:
-   - Complete in-game achievements to earn NFTs
-   - NFTs will be minted on the Solana blockchain and added to your virtual inventory
-   - Use `/nftinv` to access your NFT inventory
+2. **Earn NFTs Through Achievements**:
+   - Find and hold special named items to trigger achievements
+   - For example, hold a Blaze Rod named "Great Light" to earn the Great Light NFT
+   - When an achievement is completed, an NFT will be minted to your wallet
 
-3. **Use NFT Abilities**:
-   - **Explosion Pickaxes**: Mine blocks in a square area (3x3 to 7x7)
-   - **Laser Pickaxes**: Mine blocks in depth (2 to 6 blocks deep)
-   - **Lucky Charms**: Increase your chance of finding rare items
+3. **Manage Your NFT Inventory**:
+   - Use `/nftinv` to open your virtual NFT inventory
+   - Store, organize, and manage your NFT items
+   - Navigate through pages with the pagination buttons
 
-4. **View NFT Information**:
+4. **Use NFT Special Abilities**:
+   - **Explosion Mining**: Mine blocks in a square area (3x3 to 7x7)
+   - **Laser Mining**: Mine blocks in a straight line (up to 6 blocks deep)
+   - **Lucky Charm**: Increase your chance of finding rare items
+
+5. **View NFT Information**:
    - Hold an NFT item and use `/nftinfo` to see detailed information
    - Use `/nftlist` to browse all your NFTs with pagination
+   - Click on NFTs in the list to view detailed information
 
-### For Admins
+6. **Purchase Lootboxes**:
+   - Use `/nftlootbox <type> <amount>` to purchase lootboxes
+   - Open lootboxes to receive random NFTs of different rarities
+
+### For Administrators
 
 1. **Mint NFTs for Players**:
    - Use `/mintnft <player> <metadata_key>` to mint an NFT for a player
-   - The NFT will be added directly to the player's virtual inventory
+   - The NFT will be added to the player's wallet and virtual inventory
 
-2. **Check Player Buffs**:
+2. **Monitor Player Buffs**:
    - Use `/nftbuff <player>` to view a player's active NFT buffs
-   - This shows exact numeric values without percentage symbols
+   - This helps with balancing and troubleshooting
 
 3. **Reset Player Progress**:
-   - Use `/resetnft <player>` to reset a player's NFT progress
-   - This will remove all NFTs from their inventory and database records
+   - Use `/resetnft <player> [achievement_key]` to reset progress
+   - Reset a specific achievement or all achievements
 
-## 🎮 NFT Rarity System
+## 🎮 NFT Lootbox System
 
-NFTs are categorized into 5 rarity tiers with different drop rates:
+The plugin includes a comprehensive lootbox system with different tiers:
 
-1. 🍃 **Common** (60%): Basic NFTs with minor buffs
-2. 🍀 **Rare** (25%): Uncommon NFTs with moderate buffs
-3. 🔥 **Epic** (10%): Powerful NFTs with significant buffs
-4. 💎 **Legendary** (4%): Very rare NFTs with major buffs
-5. 🌀 **Mythic** (1%): Extremely rare NFTs with exceptional buffs
+### Lootbox Types and Prices
+- **Basic NFT Lootbox**: 500 currency units
+- **Premium NFT Lootbox**: 1500 currency units
+- **Ultimate NFT Lootbox**: 3000 currency units
 
-For detailed information about the NFT rarity system and lootboxes, see [NFT-Lootbox-System.md](NFT-Lootbox-System.md).
+### Rarity Tiers and Drop Rates
+
+#### Basic Lootbox
+- Common: 80%
+- Rare: 15%
+- Epic: 4%
+- Legendary: 0.9%
+- Mythic: 0.1%
+
+#### Premium Lootbox
+- Common: 50%
+- Rare: 35%
+- Epic: 10%
+- Legendary: 4%
+- Mythic: 1%
+
+#### Ultimate Lootbox
+- Common: 30%
+- Rare: 40%
+- Epic: 20%
+- Legendary: 8%
+- Mythic: 2%
 
 ## 🔧 Troubleshooting
 
-### "Signature is not valid" Error
+### Solana Integration Issues
 
-If you encounter a "Signature is not valid" error when minting NFTs:
+If you encounter issues with Solana integration:
 
 1. **Check Server Wallet Balance**:
    - Ensure the server wallet has sufficient SOL (at least 0.05 SOL)
-   - Add SOL to the server wallet from the Solana Faucet: [<kbd>Get SOL from Faucet</kbd>](https://solfaucet.com/)
+   - Add SOL to the server wallet from the Solana Faucet: [Solana Faucet](https://solfaucet.com/)
 
-2. **Try Alternative RPC URL**:
-   - Change the RPC_URL in the `.env` file to `https://devnet.genesysgo.net/`
+2. **Verify RPC URL**:
+   - Make sure the RPC URL in the `.env` file is correct and accessible
+   - Try alternative RPC URLs if needed: `https://devnet.genesysgo.net/`
 
-3. **Update Metaplex**:
+3. **Update Solana Dependencies**:
    ```bash
    cd plugins/NFTPlugin/solana-backend
-   npm install @metaplex-foundation/js@latest
+   npm install @metaplex-foundation/js@latest @solana/web3.js@latest
    ```
 
-4. **Clear Cache and Reinstall**:
+4. **Troubleshoot Node.js Backend**:
    ```bash
    cd plugins/NFTPlugin/solana-backend
    rm -rf node_modules
@@ -253,7 +306,7 @@ If you encounter a "Signature is not valid" error when minting NFTs:
    npm install
    ```
 
-### Backend Testing Command
+### Testing Solana Backend
 
 To test the Solana backend directly:
 
@@ -271,49 +324,71 @@ node mint-nft.js \
   --achievement "test_achievement"
 ```
 
+### Database Issues
+
+If you encounter database-related issues:
+
+1. **Check Database Connection**:
+   - Verify that the database credentials in `config.yml` are correct
+   - Make sure the MySQL/MariaDB server is running and accessible
+
+2. **Table Creation Issues**:
+   - The plugin automatically creates necessary tables
+   - If tables are not created, check database user permissions
+
+3. **Data Persistence Problems**:
+   - If data is not being saved, check database connection settings
+   - Verify that the database user has INSERT/UPDATE/DELETE privileges
+
 ## ✨ Adding New NFTs
 
-To add a new NFT:
+To add a new NFT to your server:
 
 1. **Create a Metadata File**:
    - Create a new JSON file in the `plugins/NFTPlugin/metadata/` directory
-   - Name the file according to the format `<nft_key>.json`
+   - Name the file according to the format `<achievement_key>.json`
    - Include all necessary fields: name, description, image, attributes, and quest
 
-2. **Restart the Server**:
+2. **Add Achievement to Config**:
+   - Add a new entry in the `achievements` section of `config.yml`
+   - Specify the type, material, and item name for the achievement
+
+3. **Restart the Server**:
    - The plugin will automatically detect and load the new NFT metadata
-   - No need to modify config.yml for new NFTs
+   - No need to recompile the plugin
 
-### NFT Abilities Troubleshooting
+### Custom Enchantments and Buffs
 
-If NFT abilities like explosion mining or laser mining aren't working:
+To add custom enchantments or buffs to your NFTs:
 
-1. **Check Permissions**:
-   - Ensure the player has the `nftplugin.use.abilities` permission
-   - Add the permission with: `/lp user <player> permission set nftplugin.use.abilities true`
+1. **Add Enchantment Attributes**:
+   - Include attributes with `trait_type: "Enchantment"` in the metadata file
+   - Format: `"value": "Explosion Mining III"` or `"value": "Laser Mining II"`
 
-2. **Verify Configuration**:
-   - Make sure abilities are enabled in the config.yml file
-   - Check that the NFT metadata file has the correct enchantment entries
+2. **Add Buff Attributes**:
+   - Include attributes with `trait_type: "Buff"` in the metadata file
+   - Format: `"value": "Lucky Charm +5%"`
 
-3. **Debug Mode**:
-   - Enable debug mode in config.yml to see detailed logs
-   - Check the console for any error messages related to NFT abilities
+## 📚 Technical Details
 
-## 🔐 License
+- **Database Structure**: The plugin uses MySQL/MariaDB with tables for wallets, achievements, NFTs, and inventory
+- **Solana Integration**: Uses Node.js backend with Metaplex and Solana Web3.js libraries
+- **Custom Enchantments**: Implemented using PersistentDataContainer for efficient storage
+- **Buff System**: Provides in-game bonuses based on NFT attributes
+- **Inventory System**: Paginated virtual inventory for storing and managing NFTs
 
-This plugin is released under the MIT License.
+## 📬 Support and Contact
 
-## 📬 Contact
+If you encounter any issues or have questions about the plugin:
 
-If you have any questions or encounter issues, please create an issue on GitHub or contact via email: your.email@example.com
+- Check the troubleshooting section above
+- Review the plugin configuration
+- Contact the developer for support
 
 ---
 
 <div align="center">
 
 ### ⭐ Enjoy using the Minecraft NFT Plugin! ⭐
-
-[<kbd>Report an Issue</kbd>](https://github.com/Woft257/nft-plugin/issues/new) &nbsp;&nbsp;&nbsp; [<kbd>Request a Feature</kbd>](https://github.com/Woft257/nft-plugin/issues/new?labels=enhancement) &nbsp;&nbsp;&nbsp; [<kbd>View on GitHub</kbd>](https://github.com/Woft257/nft-plugin)
 
 </div>
