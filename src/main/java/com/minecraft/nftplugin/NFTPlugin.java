@@ -3,6 +3,7 @@ package com.minecraft.nftplugin;
 import com.minecraft.nftplugin.achievements.AchievementManager;
 import com.minecraft.nftplugin.commands.MintNFTCommand;
 import com.minecraft.nftplugin.commands.NFTBuffCommand;
+import com.minecraft.nftplugin.commands.NFTHelpCommand;
 import com.minecraft.nftplugin.commands.NFTInfoCommand;
 import com.minecraft.nftplugin.commands.NFTInvCommand;
 import com.minecraft.nftplugin.commands.NFTListCommand;
@@ -117,6 +118,9 @@ public class NFTPlugin extends JavaPlugin {
 
             getCommand("nftinv").setExecutor(new NFTInvCommand(this, simpleNFTInventory));
             getLogger().info("Registered nftinv command");
+
+            getCommand("nfthelp").setExecutor(new NFTHelpCommand(this));
+            getLogger().info("Registered nfthelp command");
         } catch (Exception e) {
             getLogger().severe("Error registering commands: " + e.getMessage());
             e.printStackTrace();

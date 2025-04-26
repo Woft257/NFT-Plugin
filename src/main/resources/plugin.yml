@@ -37,6 +37,10 @@ commands:
     description: Open NFT inventory with pagination
     usage: /nftinv [page]
     permission: nftplugin.nftinfo
+  nfthelp:
+    description: Display help information about NFT plugin commands
+    usage: /nfthelp [admin]
+    permission: nftplugin.nftinfo
 
 permissions:
   nftplugin.nftinfo:
