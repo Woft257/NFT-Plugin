@@ -341,6 +341,15 @@ public class ConfigManager {
     }
 
     /**
+     * Get the custom model data for a specific achievement
+     * @param achievementKey The achievement key
+     * @return The custom model data, or -1 if not found
+     */
+    public int getNftItemCustomModelData(String achievementKey) {
+        return config.getInt("achievements." + achievementKey + ".custom_model_data", -1);
+    }
+
+    /**
      * Get the Solana Explorer URL
      * @return The Solana Explorer URL
      */

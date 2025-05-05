@@ -34,8 +34,8 @@ commands:
     usage: /test
     permission: nftplugin.nftinfo
   nftinv:
-    description: Open NFT inventory with pagination
-    usage: /nftinv [page]
+    description: Open NFT inventory with unlimited pages
+    usage: /nftinv
     permission: nftplugin.nftinfo
   nfthelp:
     description: Display help information about NFT plugin commands

@@ -358,6 +358,29 @@ public class MintNFTCommand implements CommandExecutor {
                 // Add item flags
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
 
+                // Set custom model data if present in the reward or config
+                if (reward.has("custom_model_data")) {
+                    try {
+                        int customModelData = reward.get("custom_model_data").getAsInt();
+                        meta.setCustomModelData(customModelData);
+                        plugin.getLogger().info("Applied custom model data " + customModelData + " to NFT " + achievementKey + " from metadata");
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to apply custom model data from metadata for NFT " + achievementKey + ": " + e.getMessage());
+                    }
+                } else {
+                    // Try to get custom model data from config
+                    int configCustomModelData = plugin.getConfigManager().getNftItemCustomModelData(achievementKey);
+                    if (configCustomModelData != -1) {
+                        meta.setCustomModelData(configCustomModelData);
+                        plugin.getLogger().info("Applied custom model data " + configCustomModelData + " to NFT " + achievementKey + " from config");
+                    } else {
+                        // Use default custom model data
+                        int defaultCustomModelData = plugin.getConfigManager().getNftItemCustomModelData();
+                        meta.setCustomModelData(defaultCustomModelData);
+                        plugin.getLogger().info("Applied default custom model data " + defaultCustomModelData + " to NFT " + achievementKey);
+                    }
+                }
+
                 // Add NFT data
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 NamespacedKey nftKey = new NamespacedKey(plugin, "nft");
@@ -385,6 +408,18 @@ public class MintNFTCommand implements CommandExecutor {
                 meta.setLore(lore);
                 meta.setUnbreakable(true);
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+
+                // Set custom model data from config or default
+                int configCustomModelData = plugin.getConfigManager().getNftItemCustomModelData(achievementKey);
+                if (configCustomModelData != -1) {
+                    meta.setCustomModelData(configCustomModelData);
+                    plugin.getLogger().info("Applied custom model data " + configCustomModelData + " to fallback NFT " + achievementKey + " from config");
+                } else {
+                    // Use default custom model data
+                    int defaultCustomModelData = plugin.getConfigManager().getNftItemCustomModelData();
+                    meta.setCustomModelData(defaultCustomModelData);
+                    plugin.getLogger().info("Applied default custom model data " + defaultCustomModelData + " to fallback NFT " + achievementKey);
+                }
 
                 // Add NFT data
                 PersistentDataContainer container = meta.getPersistentDataContainer();

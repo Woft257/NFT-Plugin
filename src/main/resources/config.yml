@@ -1,53 +1,409 @@
 # NFT Plugin Configuration
+# Comprehensive configuration file for all plugin settings
 
 # Database Configuration
 database:
-  host: localhost
-  port: 3306
-  database: minecraft
-  username: root
-  password: password
-  table-prefix: nftplugin_
+  enabled: true                # Whether to use database storage
+  host: localhost              # Database host address
+  port: 3306                   # Database port
+  database: minecraft          # Database name
+  username: root               # Database username
+  password: password           # Database password
+  table-prefix: nftplugin_     # Prefix for all plugin tables
+  connection-pool-size: 10     # Maximum number of connections in the pool
+  connection-timeout: 30000    # Connection timeout in milliseconds
+  max-lifetime: 1800000        # Maximum lifetime of a connection in milliseconds
 
-# Achievement Settings
-# These are the items that will trigger NFT minting when held
+# NFT Achievement Settings
+# These are the NFT items that can be minted
 achievements:
-  # Great Light - Blaze Rod
-  anh_sang_vi_dai:
-    enabled: true                # Whether this achievement is enabled
-    type: named_item             # Type of achievement (named_item = holding an item with specific name)
-    material: BLAZE_ROD         # The Minecraft material type of the item
-    item_name: "Great Light"    # The exact name the item must have to trigger the achievement
+  # Lucky Charm I - Emerald (1% Luck Buff)
+  lucky_charm_1:
+    enabled: true                # Whether this NFT is enabled
+    type: named_item             # Type of NFT
+    material: EMERALD            # The Minecraft material type
+    item_name: "Lucky Charm I"   # Display name
+    custom_model_data: 8001      # Custom model data for resource pack
+    description: "A magical charm that brings a small amount of luck"
+    rarity: "common"             # Rarity tier (common, uncommon, rare, epic, legendary, mythic)
+    buffs:                       # Buffs provided by this NFT
+      luck: 1                    # 1% luck buff
+    enchantments:                # Standard Minecraft enchantments
+      - "LUCK:1"
+    unbreakable: true
+    glowing: true
 
-  # Ancient Scroll - Paper item
+  # Lucky Charm II - Emerald (2% Luck Buff)
+  lucky_charm_2:
+    enabled: true
+    type: named_item
+    material: EMERALD
+    item_name: "Lucky Charm II"
+    custom_model_data: 8002
+    description: "A magical charm that brings a moderate amount of luck"
+    rarity: "uncommon"
+    buffs:
+      luck: 2                    # 2% luck buff
+    enchantments:
+      - "LUCK:2"
+    unbreakable: true
+    glowing: true
+
+  # Lucky Charm V - Emerald (5% Luck Buff)
+  lucky_charm_5:
+    enabled: true
+    type: named_item
+    material: EMERALD
+    item_name: "Lucky Charm V"
+    custom_model_data: 8005
+    description: "A magical charm that brings a significant amount of luck"
+    rarity: "rare"
+    buffs:
+      luck: 5                    # 5% luck buff
+    enchantments:
+      - "LUCK:3"
+    unbreakable: true
+    glowing: true
+
+  # Lucky Charm X - Emerald (10% Luck Buff)
+  lucky_charm_10:
+    enabled: true
+    type: named_item
+    material: EMERALD
+    item_name: "Lucky Charm X"
+    custom_model_data: 8010
+    description: "A magical charm that brings a substantial amount of luck"
+    rarity: "epic"
+    buffs:
+      luck: 10                   # 10% luck buff
+    enchantments:
+      - "LUCK:3"
+    unbreakable: true
+    glowing: true
+
+  # Lucky Charm XX - Emerald (20% Luck Buff)
+  lucky_charm_20:
+    enabled: true
+    type: named_item
+    material: EMERALD
+    item_name: "Lucky Charm XX"
+    custom_model_data: 8020
+    description: "A magical charm that brings an extraordinary amount of luck"
+    rarity: "legendary"
+    buffs:
+      luck: 20                   # 20% luck buff
+    enchantments:
+      - "LUCK:3"
+    unbreakable: true
+    glowing: true
+
+  # Explosion Pickaxe I - Iron Pickaxe (3x3 Mining Area)
+  explosion_pickaxe_1:
+    enabled: true
+    type: named_item
+    material: IRON_PICKAXE
+    item_name: "Explosion Pickaxe I"
+    custom_model_data: 7401
+    description: "A magical pickaxe with explosion enchantment level I"
+    rarity: "uncommon"
+    enchantments:
+      - "EFFICIENCY:3"
+      - "FORTUNE:1"
+      - "DURABILITY:2"
+      - "EXPLOSION:1"            # Custom enchantment (3x3 area)
+    unbreakable: true
+    glowing: true
+
+  # Explosion Pickaxe II - Iron Pickaxe (4x4 Mining Area)
+  explosion_pickaxe_2:
+    enabled: true
+    type: named_item
+    material: IRON_PICKAXE
+    item_name: "Explosion Pickaxe II"
+    custom_model_data: 7402
+    description: "A magical pickaxe with explosion enchantment level II"
+    rarity: "rare"
+    enchantments:
+      - "EFFICIENCY:3"
+      - "FORTUNE:2"
+      - "DURABILITY:2"
+      - "EXPLOSION:2"            # Custom enchantment (4x4 area)
+    unbreakable: true
+    glowing: true
+
+  # Explosion Pickaxe III - Diamond Pickaxe (5x5 Mining Area)
+  explosion_pickaxe_3:
+    enabled: true
+    type: named_item
+    material: DIAMOND_PICKAXE
+    item_name: "Explosion Pickaxe III"
+    custom_model_data: 7403
+    description: "A magical pickaxe with explosion enchantment level III"
+    rarity: "rare"
+    enchantments:
+      - "EFFICIENCY:4"
+      - "FORTUNE:2"
+      - "DURABILITY:3"
+      - "EXPLOSION:3"            # Custom enchantment (5x5 area)
+    unbreakable: true
+    glowing: true
+
+  # Explosion Pickaxe IV - Diamond Pickaxe (6x6 Mining Area)
+  explosion_pickaxe_4:
+    enabled: true
+    type: named_item
+    material: DIAMOND_PICKAXE
+    item_name: "Explosion Pickaxe IV"
+    custom_model_data: 7404
+    description: "A magical pickaxe with explosion enchantment level IV"
+    rarity: "epic"
+    enchantments:
+      - "EFFICIENCY:5"
+      - "FORTUNE:3"
+      - "DURABILITY:3"
+      - "MENDING:1"
+      - "EXPLOSION:4"            # Custom enchantment (6x6 area)
+    unbreakable: true
+    glowing: true
+
+  # Explosion Pickaxe V - Netherite Pickaxe (7x7 Mining Area)
+  explosion_pickaxe_5:
+    enabled: true
+    type: named_item
+    material: NETHERITE_PICKAXE
+    item_name: "Explosion Pickaxe V"
+    custom_model_data: 7405
+    description: "A magical pickaxe with explosion enchantment level V"
+    rarity: "mythic"
+    enchantments:
+      - "EFFICIENCY:5"
+      - "FORTUNE:3"
+      - "DURABILITY:3"
+      - "MENDING:1"
+      - "SILK_TOUCH:1"
+      - "EXPLOSION:5"            # Custom enchantment (7x7 area)
+    unbreakable: true
+    glowing: true
+
+  # Laser Pickaxe I - Iron Pickaxe (2 Blocks Deep)
+  laser_pickaxe_1:
+    enabled: true
+    type: named_item
+    material: IRON_PICKAXE
+    item_name: "Laser Pickaxe I"
+    custom_model_data: 7501
+    description: "A magical pickaxe with laser enchantment level I"
+    rarity: "uncommon"
+    enchantments:
+      - "EFFICIENCY:3"
+      - "FORTUNE:1"
+      - "DURABILITY:2"
+      - "LASER:1"                # Custom enchantment (2 blocks deep)
+    unbreakable: true
+    glowing: true
+
+  # Laser Pickaxe II - Iron Pickaxe (3 Blocks Deep)
+  laser_pickaxe_2:
+    enabled: true
+    type: named_item
+    material: IRON_PICKAXE
+    item_name: "Laser Pickaxe II"
+    custom_model_data: 7502
+    description: "A magical pickaxe with laser enchantment level II"
+    rarity: "rare"
+    enchantments:
+      - "EFFICIENCY:3"
+      - "FORTUNE:2"
+      - "DURABILITY:2"
+      - "LASER:2"                # Custom enchantment (3 blocks deep)
+    unbreakable: true
+    glowing: true
+
+  # Laser Pickaxe III - Diamond Pickaxe (4 Blocks Deep)
+  laser_pickaxe_3:
+    enabled: true
+    type: named_item
+    material: DIAMOND_PICKAXE
+    item_name: "Laser Pickaxe III"
+    custom_model_data: 7503
+    description: "A magical pickaxe with laser enchantment level III"
+    rarity: "rare"
+    enchantments:
+      - "EFFICIENCY:4"
+      - "FORTUNE:2"
+      - "DURABILITY:3"
+      - "LASER:3"                # Custom enchantment (4 blocks deep)
+    unbreakable: true
+    glowing: true
+
+  # Laser Pickaxe IV - Diamond Pickaxe (5 Blocks Deep)
+  laser_pickaxe_4:
+    enabled: true
+    type: named_item
+    material: DIAMOND_PICKAXE
+    item_name: "Laser Pickaxe IV"
+    custom_model_data: 7504
+    description: "A magical pickaxe with laser enchantment level IV"
+    rarity: "epic"
+    enchantments:
+      - "EFFICIENCY:5"
+      - "FORTUNE:3"
+      - "DURABILITY:3"
+      - "MENDING:1"
+      - "LASER:4"                # Custom enchantment (5 blocks deep)
+    unbreakable: true
+    glowing: true
+
+  # Laser Pickaxe V - Netherite Pickaxe (6 Blocks Deep)
+  laser_pickaxe_5:
+    enabled: true
+    type: named_item
+    material: NETHERITE_PICKAXE
+    item_name: "Laser Pickaxe V"
+    custom_model_data: 7505
+    description: "A magical pickaxe with laser enchantment level V"
+    rarity: "mythic"
+    enchantments:
+      - "EFFICIENCY:5"
+      - "FORTUNE:3"
+      - "DURABILITY:3"
+      - "MENDING:1"
+      - "SILK_TOUCH:1"
+      - "LASER:5"                # Custom enchantment (6 blocks deep)
+    unbreakable: true
+    glowing: true
+
+  # Ancient Scroll - Paper (Artifact)
   ancient_scroll:
     enabled: true
     type: named_item
     material: PAPER
-    item_name: "Ancient Scroll" # The exact name the item must have to trigger the achievement
+    item_name: "Ancient Scroll"
+    custom_model_data: 7001
+    description: "A mysterious scroll containing ancient knowledge"
+    rarity: "legendary"
+    enchantments:
+      - "LUCK:3"
+      - "DURABILITY:10"
+    unbreakable: true
+    glowing: true
 
-  # Diamond Sword - Diamond Sword item
+  # Great Light - Blaze Rod (Magic Wand)
+  great_light:
+    enabled: true
+    type: named_item
+    material: BLAZE_ROD
+    item_name: "Great Light"
+    custom_model_data: 7002
+    description: "A mystical wand containing the power of the great light"
+    rarity: "legendary"
+    enchantments:
+      - "FIRE_ASPECT:3"
+      - "DURABILITY:10"
+    unbreakable: true
+    glowing: true
+
+  # Diamond Sword of Power - Diamond Sword (Weapon)
   diamond_sword:
     enabled: true
     type: named_item
     material: DIAMOND_SWORD
-    item_name: "Sword of Power" # The exact name the item must have to trigger the achievement
+    item_name: "Sword of Power"
+    custom_model_data: 7003
+    description: "A powerful diamond sword infused with ancient magic"
+    rarity: "epic"
+    enchantments:
+      - "DAMAGE_ALL:5"
+      - "DURABILITY:10"
+      - "KNOCKBACK:2"
+    unbreakable: true
+    glowing: true
 
-# Solana Settings
+# Solana Blockchain Settings
 solana:
-  network: "devnet"             # Solana network (devnet, testnet, mainnet)
-  rpc_url: "https://api.devnet.solana.com"
+  enabled: true                # Whether to use Solana blockchain
+  network: "devnet"            # Solana network (devnet, testnet, mainnet)
+  rpc_url: "https://api.devnet.solana.com"  # RPC URL for the selected network
   server_wallet_private_key: "" # DO NOT FILL THIS IN THE CONFIG FILE! Use environment variable SOLANA_PRIVATE_KEY instead
-  mint_fee: 0.000005            # SOL amount for minting fee (paid by server wallet)
+  mint_fee: 0.000005           # SOL amount for minting fee (paid by server wallet)
+  confirmation_timeout: 60000  # Timeout for transaction confirmation in milliseconds
+  retry_count: 3               # Number of retries for failed transactions
+  metadata_upload_timeout: 30000  # Timeout for metadata upload in milliseconds
 
-# Metadata Files
-# Metadata files are automatically loaded from the 'metadata' directory
-# Each file should be named <achievement_key>.json
-# For example: anh_sang_vi_dai.json, ancient_scroll.json
-#
-# You can add new NFTs by simply adding new JSON files to the metadata directory
-# without modifying this config file or recompiling the plugin
+# NFT Inventory Settings
+inventory:
+  title: "NFT Inventory"       # Title of the NFT inventory
+  size: 54                     # Size of the inventory (must be multiple of 9)
+  items_per_page: 45           # Number of items per page (leave space for navigation)
+  allow_item_movement: false   # Whether players can move items in the inventory
+  save_interval: 300           # How often to save inventory data (in seconds)
 
+# Custom Enchantment Settings
+enchantments:
+  explosion:
+    enabled: true              # Whether this enchantment is enabled
+    max_level: 5               # Maximum level of this enchantment
+    size_formula: "level + 2"  # Formula for explosion size (level 1 = 3x3, level 2 = 4x4, etc.)
+    display_name: "Explosion"  # Display name in item lore
+    description: "Break blocks in a square pattern"  # Description in item lore
+
+  laser:
+    enabled: true
+    max_level: 5
+    depth_formula: "level + 1"  # Formula for laser depth (level 1 = 2 blocks, level 2 = 3 blocks, etc.)
+    display_name: "Laser"
+    description: "Break blocks in a straight line"
+
+# Buff System Settings
+buffs:
+  enabled: true                # Whether the buff system is enabled
+  update_interval: 20          # How often to update buffs (in ticks)
+  types:                       # Types of buffs
+    luck:
+      display_name: "Luck"
+      description: "Increases chance of rare drops"
+      max_stack: 100           # Maximum stack percentage
+
+    mining_speed:
+      display_name: "Mining Speed"
+      description: "Increases mining speed"
+      max_stack: 100
+
+    damage:
+      display_name: "Damage"
+      description: "Increases damage dealt"
+      max_stack: 100
+
+    defense:
+      display_name: "Defense"
+      description: "Reduces damage taken"
+      max_stack: 100
+
+    experience:
+      display_name: "Experience"
+      description: "Increases XP gained"
+      max_stack: 100
+
+# Default NFT Item Settings
+# These settings are used when creating NFT items if not specified in the achievement
+nft_item:
+  material: DIAMOND_PICKAXE    # Default material
+  name: "&6NFT Item"           # Default name
+  lore:                        # Default lore
+    - "&7A special NFT item"
+    - "&7Transaction ID: %nft_id%"
+    - ""
+    - "&7Use &6/nftinfo&7 for more details"
+  enchantments:                # Default enchantments
+    - "EFFICIENCY:5"
+    - "UNBREAKING:3"
+    - "MENDING:1"
+  unbreakable: true            # Whether items are unbreakable
+  custom_model_data: 7000      # Default custom model data
+  glowing: true                # Whether to add enchantment glint
+  keep_on_death: true          # Whether items are kept on death
+  prevent_dropping: true       # Whether to prevent dropping items
+  prevent_storing: false       # Whether to prevent storing in containers
 
 # Messages
 # These are the messages that will be sent to players
@@ -79,6 +435,30 @@ messages:
   nft_info_not_found: "&cThis item is not an NFT or NFT information could not be found."
   hold_nft_item: "&cYou must be holding an NFT item to use this command."
 
+  # NFT inventory messages
+  nft_inventory_title: "&6NFT Inventory - Page %page%"
+  nft_inventory_empty: "&cYour NFT inventory is empty."
+  nft_inventory_next_page: "&aNext Page"
+  nft_inventory_prev_page: "&aPrevious Page"
+  nft_inventory_current_page: "&7Page %current% of %total%"
+
+  # Buff messages
+  buff_info: "&6Your active buffs:"
+  buff_info_entry: "&7- %buff_name%: &a+%buff_value%%"
+  buff_info_none: "&7You don't have any active buffs."
+  buff_updated: "&aYour buffs have been updated."
+  buff_player_info: "&6%player%'s active buffs:"
+
   # Admin command messages
   nft_reset: "&aThe NFT and achievement progress of &6%player%&a have been reset."
   nft_reset_failed: "&cFailed to reset NFT and achievement progress."
+  admin_mint_success: "&aSuccessfully minted &6%nft_name%&a for &6%player%&a."
+  admin_mint_failed: "&cFailed to mint NFT for &6%player%&c."
+
+# Debug Settings
+debug:
+  enabled: false               # Whether debug mode is enabled
+  log_level: "INFO"            # Log level (INFO, WARNING, SEVERE)
+  log_to_file: true            # Whether to log to file
+  log_file: "debug.log"        # Debug log file name
+  show_stack_traces: true      # Whether to show stack traces in logs
