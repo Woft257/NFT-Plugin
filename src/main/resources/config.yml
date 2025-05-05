@@ -329,6 +329,8 @@ solana:
   confirmation_timeout: 60000  # Timeout for transaction confirmation in milliseconds
   retry_count: 3               # Number of retries for failed transactions
   metadata_upload_timeout: 30000  # Timeout for metadata upload in milliseconds
+  use_metadata_image_url: true # Whether to use image URL from metadata file instead of fixed URL
+  default_image_url: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreih2avuy37j27jqbscnbyqx5pesaq7a5d5ga4uorxs2mdst4tfduna"  # Default image URL if not found in metadata
 
 # NFT Inventory Settings
 inventory:

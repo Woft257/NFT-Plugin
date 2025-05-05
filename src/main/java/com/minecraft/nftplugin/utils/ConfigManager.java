@@ -240,10 +240,28 @@ public class ConfigManager {
      * @return The NFT image URL
      */
     public String getNftImageUrl(String achievementKey) {
-        // Default image URL for all achievements if not specified
-        String defaultImageUrl = "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreifri6u3f3ww7u6v2gkkcfsol2ijqbno5qmc77n5h57hytebvtr6n4";
+        // Check if we should use metadata image URL
+        boolean useMetadataImageUrl = config.getBoolean("solana.use_metadata_image_url", true);
 
-        return config.getString("achievements." + achievementKey + ".nft_image_url", defaultImageUrl);
+        if (useMetadataImageUrl) {
+            // Try to get image URL from metadata
+            String imageUrl = plugin.getMetadataManager().getNftImageUrl(achievementKey);
+            if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.equals("https://example.com/default.png")) {
+                return imageUrl;
+            }
+        }
+
+        // Try to get from config
+        String configImageUrl = config.getString("achievements." + achievementKey + ".nft_image_url", null);
+        if (configImageUrl != null && !configImageUrl.isEmpty()) {
+            return configImageUrl;
+        }
+
+        // Use default from config
+        String defaultImageUrl = config.getString("solana.default_image_url",
+            "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreifri6u3f3ww7u6v2gkkcfsol2ijqbno5qmc77n5h57hytebvtr6n4");
+
+        return defaultImageUrl;
     }
 
     /**
