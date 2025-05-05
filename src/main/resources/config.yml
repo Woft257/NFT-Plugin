@@ -8,7 +8,7 @@ database:
   port: 3306                   # Database port
   database: minecraft          # Database name
   username: root               # Database username
-  password: password           # Database password
+  password: password         # Database password
   table-prefix: nftplugin_     # Prefix for all plugin tables
   connection-pool-size: 10     # Maximum number of connections in the pool
   connection-timeout: 30000    # Connection timeout in milliseconds
@@ -32,7 +32,7 @@ achievements:
       - "LUCK:1"
     unbreakable: true
     glowing: true
-    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"  # URL to complete metadata on Pinata
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreihnnh2dinjl2jykbm4uvpvhcyqtqzgjwrqnggzt3dhdoulpfzykx4"  # URL to complete metadata on Pinata
 
   # Lucky Charm II - Emerald (2% Luck Buff)
   lucky_charm_2:
@@ -49,6 +49,7 @@ achievements:
       - "LUCK:2"
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreich4drvmvd2lf74fi3dibwrsg5dl35ymkyjgd2jhp73nqvtx5nrwe"
 
   # Lucky Charm V - Emerald (5% Luck Buff)
   lucky_charm_5:
@@ -65,6 +66,7 @@ achievements:
       - "LUCK:3"
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreicjvo57hr6mxfvmfummcst7ictheph75vw3ztehd4xyuhukdkslmu"
 
   # Lucky Charm X - Emerald (10% Luck Buff)
   lucky_charm_10:
@@ -81,6 +83,7 @@ achievements:
       - "LUCK:3"
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreibzqhlpsetlsbedv5qfogp3masmdgyastgnjqoxbjvbweb4a35zaa"
 
   # Lucky Charm XX - Emerald (20% Luck Buff)
   lucky_charm_20:
@@ -97,6 +100,7 @@ achievements:
       - "LUCK:3"
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreig3k3dlqxkp3ngfp5hipnwbqqukr4sfs4rvzsbkqhmmbo535yf7fq"
 
   # Explosion Pickaxe I - Iron Pickaxe (3x3 Mining Area)
   explosion_pickaxe_1:
@@ -114,6 +118,7 @@ achievements:
       - "EXPLOSION:1"            # Custom enchantment (3x3 area)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreigvmguwbwmw4sfb7jo66kmoihoe6wm6x7cjf4qfendqrvgbfkb4fe"
 
   # Explosion Pickaxe II - Iron Pickaxe (4x4 Mining Area)
   explosion_pickaxe_2:
@@ -131,6 +136,7 @@ achievements:
       - "EXPLOSION:2"            # Custom enchantment (4x4 area)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreic4cetbzamlhhyoefim6ao52itawzclnjjf7mt2i4ek3c26r5p4sy"
 
   # Explosion Pickaxe III - Diamond Pickaxe (5x5 Mining Area)
   explosion_pickaxe_3:
@@ -148,6 +154,7 @@ achievements:
       - "EXPLOSION:3"            # Custom enchantment (5x5 area)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreic5fawbqmdw72iiubqc4az627bkib42nl3md5pkbutip3ek37brma"
 
   # Explosion Pickaxe IV - Diamond Pickaxe (6x6 Mining Area)
   explosion_pickaxe_4:
@@ -166,6 +173,7 @@ achievements:
       - "EXPLOSION:4"            # Custom enchantment (6x6 area)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreif4lihf3z3ctwlvpin2a733xbo75julh42evr6vm2wh7xvy6wisru"
 
   # Explosion Pickaxe V - Netherite Pickaxe (7x7 Mining Area)
   explosion_pickaxe_5:
@@ -185,6 +193,7 @@ achievements:
       - "EXPLOSION:5"            # Custom enchantment (7x7 area)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreie4q7xze4p4ze72wth6b5czsp6uxmfkmuqnh23wi4fkreuyum5yli"
 
   # Laser Pickaxe I - Iron Pickaxe (2 Blocks Deep)
   laser_pickaxe_1:
@@ -202,6 +211,7 @@ achievements:
       - "LASER:1"                # Custom enchantment (2 blocks deep)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreiglypvttgs25fspynsyeobb63cxdltygh5icooxsfeyo3krv43i3u"
 
   # Laser Pickaxe II - Iron Pickaxe (3 Blocks Deep)
   laser_pickaxe_2:
@@ -219,6 +229,7 @@ achievements:
       - "LASER:2"                # Custom enchantment (3 blocks deep)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreig3o6soe3n25iss6o2aiz7b47yi36jexjxaai2tvxtc7rqf236cfu"
 
   # Laser Pickaxe III - Diamond Pickaxe (4 Blocks Deep)
   laser_pickaxe_3:
@@ -236,6 +247,7 @@ achievements:
       - "LASER:3"                # Custom enchantment (4 blocks deep)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreiennh6vpr4vq2d5ww334evblufs7qommsyac3pzy44zxlnrav6oee"
 
   # Laser Pickaxe IV - Diamond Pickaxe (5 Blocks Deep)
   laser_pickaxe_4:
@@ -254,6 +266,7 @@ achievements:
       - "LASER:4"                # Custom enchantment (5 blocks deep)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreihehgycnmumcrjj2jehtdhzenuagsw3twjolcwr65hxpj3drd62bm"
 
   # Laser Pickaxe V - Netherite Pickaxe (6 Blocks Deep)
   laser_pickaxe_5:
@@ -273,6 +286,7 @@ achievements:
       - "LASER:5"                # Custom enchantment (6 blocks deep)
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreibk4oersdfeg466l534ukfmtqyn2ii5dlricufr76kv3koqu2ncbu"
 
   # Ancient Scroll - Paper (Artifact)
   ancient_scroll:
@@ -336,13 +350,7 @@ solana:
 
   # Pinata Metadata Settings
   use_pinata_metadata: true    # Whether to use complete metadata files from Pinata
-  pinata_base_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/"  # Base URI for Pinata IPFS
-
-  # Metadata CIDs for each NFT type
-  # These will be combined with pinata_base_uri to form the complete metadata URI
-  metadata_cids:
-    lucky_charm_1: "bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"
-    # Add more CIDs for other NFT types here
+  # Không cần base URL, mỗi NFT sẽ có URL metadata riêng
 
 # NFT Inventory Settings
 inventory:
