@@ -374,6 +374,7 @@ public class MintNFTCommand implements CommandExecutor {
                         plugin.getLogger().info("Applied custom model data " + customModelData + " to NFT " + achievementKey + " from metadata");
                     } catch (Exception e) {
                         plugin.getLogger().warning("Failed to apply custom model data from metadata for NFT " + achievementKey + ": " + e.getMessage());
+                        plugin.getLogger().warning("Reward JSON: " + reward.toString());
                     }
                 } else {
                     // Try to get custom model data from config
@@ -387,6 +388,12 @@ public class MintNFTCommand implements CommandExecutor {
                         meta.setCustomModelData(defaultCustomModelData);
                         plugin.getLogger().info("Applied default custom model data " + defaultCustomModelData + " to NFT " + achievementKey);
                     }
+                }
+
+                // Force custom model data for explosion_pickaxe_5
+                if (achievementKey.equals("explosion_pickaxe_5")) {
+                    meta.setCustomModelData(7405);
+                    plugin.getLogger().info("Forced custom model data 7405 for explosion_pickaxe_5");
                 }
 
                 // Add NFT data

@@ -270,23 +270,27 @@ public class ConfigManager {
      * @return The metadata URI, or null if not configured
      */
     public String getNftMetadataUri(String achievementKey) {
+        // Special case for explosion_pickaxe_5
+        if (achievementKey.equals("explosion_pickaxe_5")) {
+            String specialUri = config.getString("achievements.explosion_pickaxe_5.metadata_uri", null);
+            if (specialUri != null && !specialUri.isEmpty()) {
+                plugin.getLogger().info("Using special metadata URI for explosion_pickaxe_5: " + specialUri);
+                return specialUri;
+            }
+        }
+
         // First check if there's a specific URI for this achievement
         String metadataUri = config.getString("achievements." + achievementKey + ".metadata_uri", null);
         if (metadataUri != null && !metadataUri.isEmpty()) {
-            // Only log at debug level
-            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
-                plugin.getLogger().fine("Using specific metadata URI for " + achievementKey);
-            }
+            // Log at info level for debugging
+            plugin.getLogger().info("Using specific metadata URI for " + achievementKey + ": " + metadataUri);
             return metadataUri;
         }
 
         // Check if we should use Pinata metadata
         boolean usePinataMetadata = config.getBoolean("solana.use_pinata_metadata", false);
         if (!usePinataMetadata) {
-            // Only log at debug level
-            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
-                plugin.getLogger().fine("Pinata metadata is disabled in config");
-            }
+            plugin.getLogger().info("Pinata metadata is disabled in config");
             return null;
         }
 
@@ -297,21 +301,15 @@ public class ConfigManager {
             String metadataCid = config.getString("solana.metadata_cids." + achievementKey, null);
             if (metadataCid != null && !metadataCid.isEmpty()) {
                 String fullUri = pinataBaseUri + metadataCid;
-                // Only log at debug level
-                if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
-                    plugin.getLogger().fine("Using generated Pinata URI for " + achievementKey);
-                }
+                plugin.getLogger().info("Using generated Pinata URI for " + achievementKey + ": " + fullUri);
                 return fullUri;
             }
         }
 
         // No specific metadata URI configured, but we want to use Pinata
-        // Only log at debug level
-        if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
-            plugin.getLogger().fine("No metadata URI found for " + achievementKey + ", but Pinata metadata is enabled");
-            plugin.getLogger().fine("Configure URI in config.yml using achievements." + achievementKey + ".metadata_uri");
-            plugin.getLogger().fine("Or using solana.pinata_base_uri and solana.metadata_cids." + achievementKey);
-        }
+        plugin.getLogger().info("No metadata URI found for " + achievementKey + ", but Pinata metadata is enabled");
+        plugin.getLogger().info("Configure URI in config.yml using achievements." + achievementKey + ".metadata_uri");
+        plugin.getLogger().info("Or using solana.pinata_base_uri and solana.metadata_cids." + achievementKey);
 
         // No metadata URI configured
         return null;

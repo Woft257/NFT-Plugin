@@ -1,169 +1,363 @@
-# ✨ Minecraft NFT Plugin ✨
+# 🔷 Minecraft NFT Plugin 🔷
 
-A comprehensive Solana NFT integration plugin for Minecraft, allowing players to receive, store, and use NFTs with special abilities in-game. This plugin creates a seamless bridge between Minecraft gameplay and Solana blockchain technology, enhancing player experience with unique collectible items.
+A comprehensive Solana NFT integration plugin for Minecraft servers. This plugin creates a seamless bridge between Minecraft gameplay and Solana blockchain technology, allowing players to own, use, and display real blockchain NFTs with special abilities in-game.
 
 <div align="center">
 
 ![NFT Plugin Banner](https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreifri6u3f3ww7u6v2gkkcfsol2ijqbno5qmc77n5h57hytebvtr6n4)
 
 [<img src="https://img.shields.io/badge/Solana-Devnet-blue?style=for-the-badge&logo=solana" alt="Solana Devnet">](https://explorer.solana.com/?cluster=devnet)
-[<img src="https://img.shields.io/badge/Minecraft-1.18+-green?style=for-the-badge&logo=minecraft" alt="Minecraft 1.18+">](https://www.minecraft.net/)
+[<img src="https://img.shields.io/badge/Minecraft-1.18.2+-green?style=for-the-badge&logo=minecraft" alt="Minecraft 1.18.2+">](https://www.minecraft.net/)
 [<img src="https://img.shields.io/badge/IPFS-Pinata-orange?style=for-the-badge&logo=ipfs" alt="IPFS Pinata">](https://www.pinata.cloud/)
+[<img src="https://img.shields.io/badge/Paper-Spigot-yellow?style=for-the-badge" alt="Paper/Spigot">](https://papermc.io/)
 
 </div>
 
-## ✅ Features
+## 📋 Table of Contents
 
-- **Solana Blockchain Integration**: Mint real NFTs directly on the Solana blockchain
-- **Virtual NFT Inventory**: Store and manage your NFTs with an unlimited paginated inventory system
+- [Features](#-features)
+- [Requirements](#-requirements)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Commands](#-commands)
+- [NFT Metadata](#-nft-metadata)
+- [Custom Enchantments](#-custom-enchantments)
+- [Buff System](#-buff-system)
+- [Technical Details](#-technical-details)
+- [Troubleshooting](#-troubleshooting)
+- [Creating New NFTs](#-creating-new-nfts)
+- [Support](#-support)
+
+## ✨ Features
+
+### Core Features
+
+- **Real Blockchain NFTs**: Mint actual NFTs on the Solana blockchain that players can view on Solana Explorer
+- **NFT Inventory System**: Dedicated inventory for storing and managing NFTs with unlimited pagination
+- **NFT List Command**: View all your NFTs with detailed information, including blockchain links
+- **Metadata Storage**: Store NFT metadata on Pinata IPFS for decentralized and permanent access
+- **Admin Minting**: Server operators can mint NFTs for players with a simple command
+
+### Gameplay Enhancements
+
 - **Custom Enchantments**:
-  - **Explosion Mining** (Levels I-IV): Mine in 3x3 to 6x6 areas
-  - **Laser Mining** (Levels I-V): Mine up to 6 blocks deep in a straight line
-- **Buff System**: Gain special abilities and bonuses from your NFTs
-  - **Lucky Charms**: Increase drop rates for rare items with percentage-based buffs
-- **SolanaLogin Integration**: Securely link your Solana wallet to your Minecraft account
-- **NFT Lootbox System**: Open lootboxes with different rarity tiers to earn NFTs
-- **Admin Commands**: Comprehensive tools for server administrators
-- **Metadata Storage**: Store NFT metadata on Pinata IPFS for decentralized access
-- **Unbreakable Items**: NFT items are unbreakable and persist after death
+  - **Explosion Mining** (Levels I-IV): Mine in square patterns from 3×3 to 6×6 areas
+  - **Laser Mining** (Levels I-V): Mine in straight lines up to 6 blocks deep
+
+- **Buff System**:
+  - **Lucky Charms**: Increase drop rates for rare items with percentage-based buffs (1% to 20%)
+  - **Stackable Buffs**: Multiple NFTs with the same buff type stack their effects
+
+- **Special NFT Properties**:
+  - **Unbreakable Items**: NFT items never break or lose durability
+  - **Death Protection**: NFT items remain in inventory after death
+  - **Custom Models**: Support for custom resource packs with unique item models
+  - **Glowing Effect**: NFT items have an enchantment glint for visual distinction
 
 ## ⚙️ Requirements
 
-- **Minecraft**: Paper/Spigot 1.18.2 or higher
+### Server Requirements
+
+- **Minecraft Server**: Paper or Spigot 1.18.2 or higher
 - **Java**: Java 17 or higher
-- **Node.js**: Node.js 16+ (for Solana blockchain integration)
-- **Plugins**:
-  - **WalletLogin**: Required for connecting player accounts to Solana wallets
-  - **Vault**: Optional, for Lootbox economy integration
+- **Memory**: Minimum 4GB RAM recommended
+- **Storage**: At least 500MB free space for plugin files and NFT data
+- **Internet Connection**: Required for blockchain interactions
+
+### Software Dependencies
+
+- **Node.js**: Version 16.0.0 or higher (for Solana blockchain integration)
+- **npm**: Latest version (comes with Node.js)
+- **Solana CLI** (optional): For testing and debugging blockchain interactions
+
+### Required Plugins
+
+- **WalletLogin**: Required for connecting player accounts to Solana wallets
+
+### Optional Plugins
+
+- **Vault**: For economy integration (if you plan to add NFT purchases later)
+- **PlaceholderAPI**: For displaying NFT information in other plugins
 
 ## 💾 Installation
 
-1. **Download the Plugin**:
-   - Download the latest NFT-Plugin.jar file from the releases page
+### Step 1: Download the Plugin
 
-2. **Install the Plugin**:
-   - Place the JAR file in your Minecraft server's `plugins` directory
-   - Install the required WalletLogin plugin
+- Download the latest `NFT-Plugin.jar` file from the [releases page](https://github.com/yourusername/NFT-Plugin/releases)
+- Download the required [WalletLogin](https://github.com/yourusername/WalletLogin/releases) plugin
 
-3. **First Run**:
-   - Start the server to generate configuration files
-   - The plugin will create the following directories:
-     - `plugins/NFTPlugin/` - Main plugin directory
-     - `plugins/NFTPlugin/metadata/` - NFT metadata files
-     - `plugins/NFTPlugin/solana-backend/` - Solana integration files
+### Step 2: Install the Plugin
 
-4. **Set Up Solana Backend**:
+- Stop your Minecraft server if it's running
+- Place both JAR files in your server's `plugins` directory
+- Create a folder named `NFTPlugin` in the `plugins` directory (optional, will be created automatically on first run)
+
+### Step 3: First Run Setup
+
+- Start your Minecraft server
+- The plugin will automatically create the following directories:
+  - `plugins/NFTPlugin/` - Main plugin directory
+  - `plugins/NFTPlugin/metadata/` - NFT metadata files
+  - `plugins/NFTPlugin/solana-backend/` - Solana integration files
+- Stop the server after the directories are created
+
+### Step 4: Set Up Solana Backend
+
+1. Install Node.js if you haven't already (version 16+)
+2. Open a terminal/command prompt and navigate to the solana-backend directory:
    ```bash
    cd plugins/NFTPlugin/solana-backend
+   ```
+3. Install the required Node.js dependencies:
+   ```bash
    npm install
    ```
+4. This will install all necessary Solana libraries and dependencies
 
-5. **Configure the Plugin**:
-   - Edit `plugins/NFTPlugin/config.yml` to customize settings
-   - Create `.env` file in `plugins/NFTPlugin/solana-backend/` (see below)
-   - Add your Solana wallet private key to the `.env` file
+### Step 5: Create a Solana Wallet
 
-6. **Add Metadata Files**:
-   - Place your NFT metadata JSON files in the `plugins/NFTPlugin/metadata/` directory
-   - Upload metadata to Pinata IPFS and update CIDs in config.yml
+1. Install the [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools) (optional but recommended)
+2. Generate a new keypair for your server:
+   ```bash
+   solana-keygen new --outfile server-keypair.json
+   ```
+3. Get the private key in base58 format:
+   ```bash
+   solana-keygen pubkey --keypair server-keypair.json
+   ```
+4. Fund your wallet with SOL (for devnet):
+   ```bash
+   solana airdrop 2 YOUR_PUBLIC_KEY --url https://api.devnet.solana.com
+   ```
 
-7. **Restart the Server**:
-   - Restart your Minecraft server to apply all changes
+### Step 6: Configure the Plugin
+
+1. Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory with the following content:
+   ```
+   SOLANA_PRIVATE_KEY=your_private_key_here
+   SOLANA_NETWORK=devnet
+   SOLANA_RPC_URL=https://api.devnet.solana.com
+   MINT_FEE=0.000005
+   CONFIRMATION_TIMEOUT=60000
+   RETRY_COUNT=5
+   ```
+2. Edit the `config.yml` file in the `plugins/NFTPlugin/` directory (see Configuration section below)
+3. Add your NFT metadata files to the `plugins/NFTPlugin/metadata/` directory
+
+### Step 7: Upload Metadata to IPFS
+
+1. Create an account on [Pinata](https://www.pinata.cloud/)
+2. Upload your NFT metadata files to Pinata
+3. Get the CID (Content Identifier) for each file
+4. Add the CIDs to your `config.yml` file (see Configuration section)
+
+### Step 8: Final Setup
+
+1. Start your Minecraft server
+2. Verify the plugin loaded correctly by checking the console for NFT Plugin startup messages
+3. Test the plugin by running the command `/nfthelp` in-game
 
 ## 🔧 Configuration
 
 ### Main Configuration (config.yml)
 
+Below is a detailed explanation of the `config.yml` file with all available options:
+
 ```yaml
 # Plugin Settings
 plugin:
-  prefix: "&6[NFT] &r"  # Prefix for plugin messages
-  debug: false          # Enable debug logging
+  prefix: "&6[NFT] &r"  # Prefix for all plugin messages
+  debug: false          # Enable detailed debug logging (set to true for troubleshooting)
+  language: "en"        # Language file to use (en, fr, etc.)
 
-# Solana Settings
+# Solana Blockchain Settings
 solana:
-  # Blockchain Settings
-  network: "devnet"     # Solana network (devnet, testnet, mainnet)
+  # Network Configuration
+  network: "devnet"     # Solana network (options: devnet, testnet, mainnet)
   rpc_url: "https://api.devnet.solana.com"  # Solana RPC URL
-  mint_fee: 0.000005    # Fee for minting NFTs (in SOL)
-  confirmation_timeout: 60000  # Transaction confirmation timeout (ms)
-  retry_count: 3        # Number of retries for failed operations
+  mint_fee: 0.000005    # Fee for minting NFTs in SOL (0.000005 SOL = 5000 lamports)
+  confirmation_timeout: 60000  # Transaction confirmation timeout in milliseconds
+  retry_count: 3        # Number of retries for failed blockchain operations
 
-  # Metadata Settings
-  use_metadata_image_url: true  # Use image URL from metadata files
+  # Metadata Configuration
+  use_metadata_image_url: true  # Use image URL from metadata files for NFT display
   default_image_url: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreifri6u3f3ww7u6v2gkkcfsol2ijqbno5qmc77n5h57hytebvtr6n4"
 
-  # Pinata IPFS Settings
-  use_pinata_metadata: true  # Use complete metadata files from Pinata
+  # Pinata IPFS Integration
+  use_pinata_metadata: true  # Use complete metadata files from Pinata IPFS
   pinata_base_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/"  # Base URI for Pinata IPFS
 
   # Metadata CIDs for each NFT type
+  # Format: nft_key: "content_identifier"
   metadata_cids:
     lucky_charm_1: "bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"
+    lucky_charm_2: "bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"
+    lucky_charm_3: "bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"
     explosion_pickaxe_1: "bafkreiabcd1234567890abcdef1234567890abcdef1234567890"
+    explosion_pickaxe_2: "bafkreiabcd1234567890abcdef1234567890abcdef1234567890"
+    explosion_pickaxe_3: "bafkreiabcd1234567890abcdef1234567890abcdef1234567890"
+    explosion_pickaxe_4: "bafkreiabcd1234567890abcdef1234567890abcdef1234567890"
+    explosion_pickaxe_5: "bafkreiabcd1234567890abcdef1234567890abcdef1234567890"
     laser_pickaxe_1: "bafkreiefgh1234567890abcdef1234567890abcdef1234567890"
-    # Add more CIDs for other NFT types
+    laser_pickaxe_2: "bafkreiefgh1234567890abcdef1234567890abcdef1234567890"
+    laser_pickaxe_3: "bafkreiefgh1234567890abcdef1234567890abcdef1234567890"
+    laser_pickaxe_4: "bafkreiefgh1234567890abcdef1234567890abcdef1234567890"
+    laser_pickaxe_5: "bafkreiefgh1234567890abcdef1234567890abcdef1234567890"
 
 # NFT Inventory Settings
 inventory:
   title: "NFT Inventory"  # Title of the NFT inventory GUI
   rows: 6                 # Number of rows in the inventory (max 6)
   auto_pagination: true   # Automatically create new pages when needed
+  item_spacing: 1         # Spacing between items (0 = no spacing)
+  background_item: "BLACK_STAINED_GLASS_PANE"  # Material for background items
+
+# NFT List Settings
+nft_list:
+  items_per_page: 5       # Number of NFTs to display per page
+  show_explorer_link: true  # Show Solana Explorer link
+  show_image_link: true   # Show NFT image link
 
 # NFT Item Settings
 nft_item:
   unbreakable: true       # Make NFT items unbreakable
   keep_on_death: true     # Keep NFT items on death
   allow_in_chests: true   # Allow storing NFT items in chests
+  allow_in_enderchest: true  # Allow storing NFT items in enderchests
+  prevent_dropping: false  # Prevent players from dropping NFT items
 
 # Enchantment Settings
 enchantments:
   explosion:
-    enabled: true
+    enabled: true         # Enable Explosion Mining enchantment
     max_level: 4          # Maximum level for Explosion Mining (1-4)
-    cooldown: 0           # Cooldown between uses (seconds)
+    cooldown: 0           # Cooldown between uses in seconds (0 = no cooldown)
+    affect_ores_only: false  # Only affect ore blocks
+    patterns:             # Mining patterns for each level
+      1: 3                # Level 1: 3x3 area
+      2: 4                # Level 2: 4x4 area
+      3: 5                # Level 3: 5x5 area
+      4: 6                # Level 4: 6x6 area
 
   laser:
-    enabled: true
+    enabled: true         # Enable Laser Mining enchantment
     max_level: 5          # Maximum level for Laser Mining (1-5)
-    cooldown: 0           # Cooldown between uses (seconds)
+    cooldown: 0           # Cooldown between uses in seconds
+    affect_ores_only: false  # Only affect ore blocks
+    depths:               # Mining depths for each level
+      1: 2                # Level 1: 2 blocks deep
+      2: 3                # Level 2: 3 blocks deep
+      3: 4                # Level 3: 4 blocks deep
+      4: 5                # Level 4: 5 blocks deep
+      5: 6                # Level 5: 6 blocks deep
 
 # Buff Settings
 buffs:
   luck:
-    enabled: true
+    enabled: true         # Enable Luck buff
     max_value: 20         # Maximum luck buff value (percentage)
+    stack_method: "ADD"   # How buffs stack: ADD (add values) or MAX (use highest)
+
+  # Add more buff types here as needed
 ```
 
 ### Solana Backend Configuration (.env)
 
-Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory:
+Create a `.env` file in the `plugins/NFTPlugin/solana-backend/` directory with the following content:
 
 ```
-# IMPORTANT: You must set your Solana wallet private key here
+# IMPORTANT: Server Wallet Private Key (base58 encoded)
 # This wallet will be used to mint NFTs and pay for transaction fees
-# The private key should be in base58 format
+# KEEP THIS SECURE AND NEVER SHARE IT
 SOLANA_PRIVATE_KEY=your_private_key_here
 
-# Solana network settings (devnet, testnet, mainnet)
+# Solana Network Configuration
 SOLANA_NETWORK=devnet
 SOLANA_RPC_URL=https://api.devnet.solana.com
 
-# Mint fee in SOL (paid by the server wallet)
+# Transaction Settings
 MINT_FEE=0.000005
-
-# Transaction confirmation timeout (milliseconds)
 CONFIRMATION_TIMEOUT=60000
-
-# Number of retries for failed operations
 RETRY_COUNT=5
+
+# Advanced Settings (optional)
+# MAX_CONCURRENT_TRANSACTIONS=3
+# LOG_LEVEL=info
 ```
 
-### Metadata Files
+### NFT Metadata Structure
 
-Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each NFT type:
+Each NFT requires a metadata JSON file in the `plugins/NFTPlugin/metadata/` directory. Here's a detailed explanation of the metadata structure:
 
-**lucky_charm_1.json**:
+#### Basic Metadata Fields
+
+```json
+{
+  "name": "NFT Name",           // Required: Name of the NFT
+  "symbol": "SYMBOL",           // Required: Short symbol for the NFT
+  "description": "Description", // Required: Description of the NFT
+  "image": "https://...",       // Required: URL to the NFT image
+
+  "attributes": [               // Optional: Array of trait attributes
+    {
+      "trait_type": "Type",     // Category of the trait
+      "value": "Tool"           // Value of the trait
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Enchantment",
+      "value": "Explosion Mining I"
+    }
+  ],
+
+  "properties": {               // Optional: Additional properties
+    "files": [                  // Array of associated files
+      {
+        "uri": "https://...",   // URL to the file
+        "type": "image/png"     // MIME type of the file
+      }
+    ]
+  }
+}
+```
+
+#### Minecraft-Specific Fields
+
+The `quest` section contains Minecraft-specific information:
+
+```json
+"quest": {
+  "reward": {                   // Information about the in-game item
+    "item": "DIAMOND_PICKAXE",  // Minecraft material type
+    "name": "§b§lExplosion Pickaxe I",  // Formatted item name
+    "lore": [                   // Array of lore lines
+      "§7A pickaxe with explosive mining capabilities",
+      "§7Mines blocks in a 3x3 area",
+      "§d§lEnchantments:",
+      "§b- Explosion Mining I"
+    ],
+    "enchantments": [           // Array of enchantments
+      "DURABILITY:10",          // Format: ENCHANTMENT_KEY:LEVEL
+      "EXPLOSION_MINING:1"
+    ],
+    "unbreakable": true,        // Whether the item is unbreakable
+    "glowing": true,            // Whether the item has a glowing effect
+    "custom_model_data": 9001   // Custom model data for resource packs
+  },
+  "buff": {                     // Optional: Buff provided by this NFT
+    "type": "LUCK",             // Type of buff
+    "value": 1                  // Value of the buff (percentage)
+  }
+}
+```
+
+### Example Metadata Files
+
+#### Lucky Charm I (Buff NFT)
+
 ```json
 {
   "name": "Lucky Charm I",
@@ -219,7 +413,8 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each NFT ty
 }
 ```
 
-**explosion_pickaxe_1.json**:
+#### Explosion Pickaxe I (Tool NFT)
+
 ```json
 {
   "name": "Explosion Pickaxe I",
@@ -276,35 +471,158 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each NFT ty
 
 ### Player Commands
 
-| Command | Description | Permission |
-|---------|-------------|------------|
-| `/nftinv` | Open your NFT inventory | `nftplugin.command.nftinv` |
-| `/nftlist` | View a list of your NFTs | `nftplugin.command.nftlist` |
-| `/nfthelp` | Show help information | `nftplugin.command.nfthelp` |
+| Command | Description | Permission | Example |
+|---------|-------------|------------|---------|
+| `/nftinv` | Open your NFT inventory | `nftplugin.command.nftinv` | `/nftinv` |
+| `/nftlist` | View a list of your NFTs | `nftplugin.command.nftlist` | `/nftlist` |
+| `/nfthelp` | Show help information | `nftplugin.command.nfthelp` | `/nfthelp` |
 
 ### Admin Commands
 
-| Command | Description | Permission |
-|---------|-------------|------------|
-| `/mintnft <username> <metadata_key>` | Mint an NFT for a player | `nftplugin.command.mintnft` |
-| `/nftbuff <player>` | View a player's NFT buffs | `nftplugin.command.nftbuff` |
+| Command | Description | Permission | Example |
+|---------|-------------|------------|---------|
+| `/mintnft <username> <metadata_key>` | Mint an NFT for a player | `nftplugin.command.mintnft` | `/mintnft Steve lucky_charm_1` |
+| `/nftbuff <player>` | View a player's NFT buffs | `nftplugin.command.nftbuff` | `/nftbuff Steve` |
 
-### Command Examples
+### Command Details
 
-**Minting an NFT for a player:**
+#### `/nftinv` - NFT Inventory
+
+Opens a graphical inventory showing all NFTs owned by the player. Features include:
+
+- **Unlimited Pagination**: Automatically creates new pages as needed
+- **Interactive Interface**: Click on NFTs to view detailed information
+- **Visual Display**: Shows NFT items with their actual appearance
+- **Sorting**: NFTs are sorted by acquisition date (newest first)
+
+Usage:
+```
+/nftinv
+```
+
+#### `/nftlist` - NFT List
+
+Displays a text-based list of all NFTs owned by the player. Features include:
+
+- **Pagination**: Navigate through pages of NFTs
+- **Detailed Information**: Shows NFT name, description, and acquisition date
+- **Blockchain Links**: Clickable links to view the NFT on Solana Explorer
+- **Image Links**: Clickable links to view the NFT image
+
+Usage:
+```
+/nftlist
+```
+
+#### `/nfthelp` - Help Command
+
+Shows a list of available commands and their usage. The information displayed depends on the player's permissions:
+
+- **Regular Players**: See only player commands
+- **Operators/Admins**: See all commands including admin commands
+
+Usage:
+```
+/nfthelp
+```
+
+#### `/mintnft` - Mint NFT (Admin Only)
+
+Mints a new NFT for a specified player. This command:
+
+1. Creates a new NFT on the Solana blockchain
+2. Adds the NFT to the player's virtual inventory
+3. Gives the player an in-game item representing the NFT
+
+Usage:
+```
+/mintnft <username> <metadata_key>
+```
+
+Parameters:
+- `<username>`: The name of the player to receive the NFT
+- `<metadata_key>`: The key of the NFT metadata file (without .json extension)
+
+Examples:
 ```
 /mintnft Steve lucky_charm_1
+/mintnft Alex explosion_pickaxe_3
+/mintnft Notch laser_pickaxe_2
 ```
 
-**Checking a player's NFT buffs:**
+#### `/nftbuff` - Check Buffs (Admin Only)
+
+Shows the active buffs provided by a player's NFTs. This command displays:
+
+- The exact numeric values of all buffs
+- The total combined buff value
+- The source NFTs providing each buff
+
+Usage:
+```
+/nftbuff <player>
+```
+
+Parameters:
+- `<player>`: The name of the player to check
+
+Example:
 ```
 /nftbuff Steve
 ```
 
-**Opening your NFT inventory:**
-```
-/nftinv
-```
+## 📦 NFT Metadata
+
+### Understanding NFT Metadata
+
+NFT metadata is the information that defines what an NFT is and how it appears both on the blockchain and in-game. The plugin uses a combination of on-chain and off-chain metadata:
+
+1. **On-Chain Metadata**: Basic information stored directly on the Solana blockchain
+   - Name
+   - Symbol
+   - URI pointing to the full metadata
+
+2. **Off-Chain Metadata**: Detailed information stored on IPFS via Pinata
+   - Complete description
+   - Image URL
+   - Attributes
+   - Minecraft-specific properties
+
+### Metadata Storage Flow
+
+1. You create a JSON metadata file in the `plugins/NFTPlugin/metadata/` directory
+2. You upload this file to Pinata IPFS and get a CID
+3. You add this CID to your `config.yml` file
+4. When an NFT is minted, the plugin:
+   - Retrieves the metadata from Pinata using the CID
+   - Creates the on-chain NFT with a link to this metadata
+   - Creates an in-game item based on the metadata
+
+### Metadata Fields Explained
+
+#### Standard Metaplex Fields
+
+These fields follow the [Metaplex NFT Standard](https://docs.metaplex.com/programs/token-metadata/token-standard):
+
+- **name**: The name of the NFT (displayed on marketplaces and explorers)
+- **symbol**: A short symbol for the NFT (like a ticker symbol)
+- **description**: A detailed description of the NFT
+- **image**: URL to the image representing the NFT
+- **attributes**: Array of traits that describe the NFT
+- **properties**: Additional properties including associated files
+
+#### Minecraft-Specific Fields
+
+These fields are specific to the NFT Plugin and control how the NFT appears in-game:
+
+- **quest.reward.item**: The Minecraft material type for the item
+- **quest.reward.name**: The formatted name of the item (supports color codes)
+- **quest.reward.lore**: Array of lore lines (supports color codes)
+- **quest.reward.enchantments**: Array of enchantments to apply
+- **quest.reward.unbreakable**: Whether the item is unbreakable
+- **quest.reward.glowing**: Whether the item has a glowing effect
+- **quest.reward.custom_model_data**: Custom model data for resource packs
+- **quest.buff**: Information about buffs provided by this NFT
 
 ## 📖 Usage Guide
 
@@ -313,9 +631,15 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each NFT ty
 #### Connecting Your Wallet
 
 1. **Register Your Solana Wallet**:
-   - Install the WalletLogin plugin on your server
    - Use `/connectwallet <wallet_address>` to link your Solana wallet
+   - You'll receive a confirmation message when successful
    - This allows you to receive NFTs on the Solana blockchain
+   - You can view your NFTs on Solana Explorer or in-game
+
+2. **Verifying Your Connection**:
+   - Use `/wallet` to check your connected wallet address
+   - The wallet address will be displayed in chat
+   - This confirms your Minecraft account is linked to your Solana wallet
 
 #### Managing Your NFTs
 
@@ -324,124 +648,219 @@ Create JSON files in the `plugins/NFTPlugin/metadata/` directory for each NFT ty
    - Your NFT items will be displayed in a GUI
    - The inventory automatically creates new pages as needed
    - Click on any NFT to see detailed information
+   - Use the navigation buttons at the bottom to move between pages
 
 2. **List Your NFTs**:
-   - Use `/nftlist` to see your NFTs in an interactive GUI
+   - Use `/nftlist` to see your NFTs in an interactive list
+   - Each NFT entry shows:
+     - NFT name and acquisition date
+     - Brief description
+     - Rarity and type information
    - Click on any NFT to view detailed information including:
-     - NFT name and description
-     - NFT ID and transaction ID
+     - Full description and attributes
+     - Transaction ID on the blockchain
      - Clickable Solana Explorer link to view on blockchain
      - Clickable image link to view the NFT artwork
    - Navigate between pages using the arrow buttons
 
 3. **Get Help**:
    - Use `/nfthelp` to see available commands and information
-   - Regular players will see only player commands
+   - The help menu shows commands you have permission to use
+   - Each command includes a brief description of its function
 
 #### Using NFT Special Abilities
 
 1. **Explosion Mining**:
-   - Equip an Explosion Mining pickaxe
-   - Mine a block to trigger the explosion effect
-   - Blocks in a square area will be mined simultaneously
-   - Area size depends on enchantment level:
-     - Level I: 3x3 area
-     - Level II: 4x4 area
-     - Level III: 5x5 area
-     - Level IV: 6x6 area
+   - **Preparation**: Equip an Explosion Mining pickaxe in your main hand
+   - **Activation**: Mine any block as you normally would
+   - **Effect**: All blocks in a square area around the target block will be mined simultaneously
+   - **Area Size**: Depends on enchantment level:
+     - Level I: 3×3 area (9 blocks total)
+     - Level II: 4×4 area (16 blocks total)
+     - Level III: 5×5 area (25 blocks total)
+     - Level IV: 6×6 area (36 blocks total)
+   - **Behavior**:
+     - Works on any block the pickaxe can normally mine
+     - Respects block protection (won't mine protected blocks)
+     - Drops all items as if mined normally
+     - No durability loss due to unbreakable property
 
 2. **Laser Mining**:
-   - Equip a Laser Mining pickaxe
-   - Mine a block to trigger the laser effect
-   - Blocks in a straight line will be mined
-   - Depth depends on enchantment level:
+   - **Preparation**: Equip a Laser Mining pickaxe in your main hand
+   - **Activation**: Mine any block as you normally would
+   - **Effect**: All blocks in a straight line behind the target block will be mined
+   - **Depth**: Depends on enchantment level:
      - Level I: 2 blocks deep
      - Level II: 3 blocks deep
      - Level III: 4 blocks deep
      - Level IV: 5 blocks deep
      - Level V: 6 blocks deep
+   - **Behavior**:
+     - Works in the direction you're facing
+     - Only mines blocks the pickaxe can normally mine
+     - Stops at unbreakable blocks or protected areas
+     - Drops all items as if mined normally
 
 3. **Lucky Charm Buffs**:
-   - Keep Lucky Charm items in your inventory
-   - Buffs are applied automatically
-   - Higher level charms provide better luck bonuses
+   - **Activation**: Simply keep Lucky Charm items in your inventory
+   - **Effect**: Increases your chance of getting better drops from blocks and mobs
+   - **Stacking**: Multiple Lucky Charms stack their effects:
+     - Lucky Charm I: +1% luck
+     - Lucky Charm II: +2% luck
+     - Lucky Charm III: +5% luck
+     - Lucky Charm IV: +10% luck
+     - Lucky Charm V: +20% luck
+   - **Example**: Having Lucky Charm I and Lucky Charm II gives +3% total luck
 
 ### For Administrators
 
 #### Managing NFTs
 
 1. **Mint NFTs for Players**:
-   - Use `/mintnft <player> <metadata_key>` to mint an NFT
-   - Example: `/mintnft Steve lucky_charm_1`
-   - The NFT will be minted on the Solana blockchain
-   - A corresponding item will be added to the player's NFT inventory
+   - **Command**: `/mintnft <player> <metadata_key>`
+   - **Example**: `/mintnft Steve lucky_charm_1`
+   - **Process**:
+     1. The plugin connects to the Solana blockchain
+     2. Creates a new NFT token with metadata from Pinata
+     3. Transfers the NFT to the player's connected wallet
+     4. Creates an in-game item representing the NFT
+     5. Adds the item to the player's inventory
+   - **Requirements**:
+     - Server wallet must have sufficient SOL for transaction fees
+     - Player must have a connected wallet (via WalletLogin)
+     - Metadata file must exist for the specified key
 
 2. **Check Player Buffs**:
-   - Use `/nftbuff <player>` to view a player's active buffs
-   - Example: `/nftbuff Steve`
-   - This shows exact numeric values of all buffs
+   - **Command**: `/nftbuff <player>`
+   - **Example**: `/nftbuff Steve`
+   - **Output**:
+     - Shows all active buffs and their exact numeric values
+     - Lists the source NFTs providing each buff
+     - Displays the total combined buff value
+   - **Usage**: Useful for debugging and balancing
 
 #### Setting Up NFTs
 
 1. **Create Metadata Files**:
    - Create JSON files in the `plugins/NFTPlugin/metadata/` directory
+   - Name format: `<metadata_key>.json` (e.g., `lucky_charm_1.json`)
    - Follow the format shown in the Configuration section
    - Include all required fields: name, description, image, etc.
+   - Test your JSON with a validator to ensure it's properly formatted
 
 2. **Upload to Pinata IPFS**:
-   - Upload metadata files to Pinata IPFS
+   - Create an account on [Pinata](https://www.pinata.cloud/)
+   - Upload your metadata JSON files to Pinata
    - Get the CID (Content Identifier) for each file
-   - Add CIDs to the `config.yml` file
+   - Add CIDs to the `config.yml` file under `solana.metadata_cids`
 
 3. **Configure the Plugin**:
-   - Set up the Solana wallet for the server
+   - Set up the Solana wallet for the server (see Installation section)
    - Configure metadata URIs in `config.yml`
    - Customize enchantment and buff settings
+   - Restart the server to apply changes
 
-## 🎮 NFT Lootbox System
+## ⚒️ Custom Enchantments
 
-The plugin includes a comprehensive lootbox system with different tiers and rarity levels:
+The NFT Plugin includes two powerful custom enchantments that enhance mining capabilities:
 
-### Lootbox Types
+### Explosion Mining
 
-| Lootbox Type | Description | Rarity Distribution |
-|--------------|-------------|---------------------|
-| **Common Lootbox** | Basic lootbox with mostly common items | Common: 80%, Rare: 15%, Epic: 4%, Legendary: 1% |
-| **Rare Lootbox** | Mid-tier lootbox with better chances | Common: 40%, Rare: 40%, Epic: 15%, Legendary: 5% |
-| **Epic Lootbox** | High-tier lootbox with good odds | Common: 20%, Rare: 30%, Epic: 35%, Legendary: 15% |
-| **Legendary Lootbox** | Top-tier lootbox with best chances | Common: 10%, Rare: 20%, Epic: 40%, Legendary: 30% |
+Explosion Mining allows players to mine multiple blocks at once in a square pattern around the target block.
 
-### NFT Rarity Tiers
+#### Technical Details
 
-| Rarity | Description | Buff/Enchantment Range |
-|--------|-------------|------------------------|
-| **Common** | Basic NFTs with minor buffs | Luck: 1-5%, Enchantments: Level I |
-| **Rare** | Uncommon NFTs with moderate buffs | Luck: 5-10%, Enchantments: Level II |
-| **Epic** | Valuable NFTs with significant buffs | Luck: 10-15%, Enchantments: Level III |
-| **Legendary** | Extremely rare NFTs with powerful buffs | Luck: 15-20%, Enchantments: Level IV |
+- **Enchantment ID**: `EXPLOSION_MINING`
+- **Maximum Level**: 4
+- **Applicable Items**: Pickaxes
+- **Activation**: Breaking any minable block
+- **Effect Area**: Square pattern centered on the broken block
 
-### Lootbox Configuration
+#### Level Progression
 
-Lootbox settings can be configured in the `config.yml` file:
+| Level | Area Size | Total Blocks | Description |
+|-------|-----------|--------------|-------------|
+| I     | 3×3       | 9 blocks     | Small explosion radius |
+| II    | 4×4       | 16 blocks    | Medium explosion radius |
+| III   | 5×5       | 25 blocks    | Large explosion radius |
+| IV    | 6×6       | 36 blocks    | Massive explosion radius |
 
-```yaml
-lootboxes:
-  common:
-    enabled: true
-    common_chance: 80
-    rare_chance: 15
-    epic_chance: 4
-    legendary_chance: 1
+#### Implementation Details
 
-  rare:
-    enabled: true
-    common_chance: 40
-    rare_chance: 40
-    epic_chance: 15
-    legendary_chance: 5
+- The enchantment respects block protection plugins and won't break protected blocks
+- All blocks are broken as if the player mined them normally (drops all items)
+- Experience orbs are dropped for each block that would normally give experience
+- The enchantment works in all dimensions (Overworld, Nether, End)
+- No durability is consumed due to the unbreakable property of NFT items
 
-  # Add more lootbox types as needed
-```
+### Laser Mining
+
+Laser Mining allows players to mine multiple blocks in a straight line extending from the target block.
+
+#### Technical Details
+
+- **Enchantment ID**: `LASER_MINING`
+- **Maximum Level**: 5
+- **Applicable Items**: Pickaxes
+- **Activation**: Breaking any minable block
+- **Effect Area**: Straight line in the direction the player is facing
+
+#### Level Progression
+
+| Level | Depth | Total Blocks | Description |
+|-------|-------|--------------|-------------|
+| I     | 2     | 2 blocks     | Short laser beam |
+| II    | 3     | 3 blocks     | Medium laser beam |
+| III   | 4     | 4 blocks     | Long laser beam |
+| IV    | 5     | 5 blocks     | Extended laser beam |
+| V     | 6     | 6 blocks     | Maximum laser beam |
+
+#### Implementation Details
+
+- The laser beam extends in the direction the player is facing
+- The beam stops if it encounters an unbreakable block or protected area
+- All blocks are broken as if the player mined them normally
+- The enchantment is particularly useful for mining veins of ore or creating tunnels
+- No durability is consumed due to the unbreakable property of NFT items
+
+## 🔮 Buff System
+
+The NFT Plugin includes a buff system that provides passive bonuses to players based on the NFTs they possess.
+
+### Luck Buff
+
+The Luck buff increases a player's chance of receiving better drops from blocks and mobs.
+
+#### Technical Details
+
+- **Buff ID**: `LUCK`
+- **Value Range**: 1% to 20%
+- **Stacking Method**: Additive (multiple buffs add their values together)
+- **Activation**: Passive (active while the NFT is in the player's inventory)
+
+#### Buff Levels
+
+| NFT | Buff Value | Description |
+|-----|------------|-------------|
+| Lucky Charm I | +1% | Slight increase in luck |
+| Lucky Charm II | +2% | Minor increase in luck |
+| Lucky Charm III | +5% | Moderate increase in luck |
+| Lucky Charm IV | +10% | Significant increase in luck |
+| Lucky Charm V | +20% | Major increase in luck |
+
+#### Implementation Details
+
+- The luck percentage directly increases the chance of rare drops
+- For example, with a +10% luck buff, a drop with a base 5% chance becomes 5.5% (5% + 10% of 5%)
+- The buff applies to all random drops in the game (blocks, mobs, fishing, etc.)
+- Multiple Lucky Charms stack their effects (e.g., Lucky Charm I + Lucky Charm II = +3% luck)
+- The maximum combined luck buff is capped at 20% by default (configurable)
+
+### Viewing Buffs
+
+- **Players**: Cannot directly view their buff values
+- **Administrators**: Can view any player's buffs using the `/nftbuff <player>` command
+- The command shows the exact numeric values of all buffs and their sources
 
 ## 🔧 Troubleshooting
 
@@ -455,6 +874,17 @@ lootboxes:
 | **"Failed to load bindings"** | Run `npm rebuild` in the solana-backend directory |
 | **"Error: NFT metadata is required"** | Ensure metadata files have name, description, and image fields |
 | **"Cannot connect to RPC URL"** | Check network connection and RPC URL in config |
+| **"Transaction simulation failed"** | Verify the server wallet has enough SOL for the transaction |
+| **"Invalid private key"** | Check that the private key in .env is in base58 format |
+
+#### Plugin Issues
+
+| Issue | Solution |
+|-------|----------|
+| **NFT items not showing custom models** | Ensure custom_model_data is set correctly in metadata |
+| **Enchantments not working** | Check that the enchantment is enabled in config.yml |
+| **NFT inventory not opening** | Verify the player has permission to use the command |
+| **Explorer links not working** | Check that the Solana network is configured correctly |
 
 #### Node.js Backend Issues
 
@@ -618,9 +1048,10 @@ Custom enchantments are implemented using:
 
 The buff system provides in-game bonuses:
 
-- **Luck Buffs**: Increase drop rates for rare items
-- **Mining Buffs**: Enhance mining speed and efficiency
-- **Stackable Effects**: Multiple buffs can be combined
+- **Luck Buffs**: Increase drop rates for rare items (1% to 20%)
+- **Stacking System**: Multiple buffs of the same type add together
+- **Passive Effects**: Active as long as the NFT is in the player's inventory
+- **Admin Monitoring**: Server operators can view all active buffs with `/nftbuff`
 
 ### NFT Inventory
 
@@ -629,14 +1060,29 @@ The virtual NFT inventory system features:
 - **Custom GUI**: User-friendly interface for managing NFTs
 - **Unlimited Pagination**: Automatically creates new pages as needed
 - **Persistent Storage**: NFTs are saved between sessions
+- **Interactive Elements**: Click on NFTs to view detailed information
+- **Visual Display**: Shows NFT items with their actual appearance and properties
+
+### Data Storage
+
+The plugin uses several storage systems:
+
+- **Local Files**: Metadata templates and configuration
+- **Pinata IPFS**: Decentralized storage for metadata and images
+- **Solana Blockchain**: Immutable record of NFT ownership
+- **Plugin Database**: Links between in-game items and blockchain NFTs
 
 ## 📞 Support and Contact
 
 If you need help with the plugin:
 
-- **GitHub Issues**: Report bugs and request features
-- **Discord**: Join our community for support
-- **Documentation**: Refer to this README for detailed information
+- **GitHub Issues**: Report bugs and request features at [GitHub Repository](https://github.com/yourusername/NFT-Plugin/issues)
+- **Discord**: Join our community for support at [Discord Server](https://discord.gg/yourserver)
+- **Email**: Contact us directly at support@yourwebsite.com
+
+## 📜 License
+
+This plugin is released under the MIT License. See the LICENSE file for details.
 
 ---
 
@@ -645,6 +1091,8 @@ If you need help with the plugin:
 ### ⭐ Enjoy your NFT adventures in Minecraft! ⭐
 
 [<img src="https://img.shields.io/badge/Solana-Devnet-blue?style=for-the-badge&logo=solana" alt="Solana Devnet">](https://explorer.solana.com/?cluster=devnet)
+[<img src="https://img.shields.io/badge/Minecraft-1.18.2+-green?style=for-the-badge&logo=minecraft" alt="Minecraft 1.18.2+">](https://www.minecraft.net/)
 [<img src="https://img.shields.io/badge/IPFS-Pinata-orange?style=for-the-badge&logo=ipfs" alt="IPFS Pinata">](https://www.pinata.cloud/)
+[<img src="https://img.shields.io/badge/Paper-Spigot-yellow?style=for-the-badge" alt="Paper/Spigot">](https://papermc.io/)
 
 </div>
