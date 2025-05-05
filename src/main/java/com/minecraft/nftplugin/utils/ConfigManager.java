@@ -265,6 +265,59 @@ public class ConfigManager {
     }
 
     /**
+     * Get the complete metadata URI for an achievement
+     * @param achievementKey The achievement key
+     * @return The metadata URI, or null if not configured
+     */
+    public String getNftMetadataUri(String achievementKey) {
+        // First check if there's a specific URI for this achievement
+        String metadataUri = config.getString("achievements." + achievementKey + ".metadata_uri", null);
+        if (metadataUri != null && !metadataUri.isEmpty()) {
+            // Only log at debug level
+            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
+                plugin.getLogger().fine("Using specific metadata URI for " + achievementKey);
+            }
+            return metadataUri;
+        }
+
+        // Check if we should use Pinata metadata
+        boolean usePinataMetadata = config.getBoolean("solana.use_pinata_metadata", false);
+        if (!usePinataMetadata) {
+            // Only log at debug level
+            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
+                plugin.getLogger().fine("Pinata metadata is disabled in config");
+            }
+            return null;
+        }
+
+        // Check if we have a base Pinata metadata URI
+        String pinataBaseUri = config.getString("solana.pinata_base_uri", null);
+        if (pinataBaseUri != null && !pinataBaseUri.isEmpty()) {
+            // Get the CID for this metadata key
+            String metadataCid = config.getString("solana.metadata_cids." + achievementKey, null);
+            if (metadataCid != null && !metadataCid.isEmpty()) {
+                String fullUri = pinataBaseUri + metadataCid;
+                // Only log at debug level
+                if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
+                    plugin.getLogger().fine("Using generated Pinata URI for " + achievementKey);
+                }
+                return fullUri;
+            }
+        }
+
+        // No specific metadata URI configured, but we want to use Pinata
+        // Only log at debug level
+        if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
+            plugin.getLogger().fine("No metadata URI found for " + achievementKey + ", but Pinata metadata is enabled");
+            plugin.getLogger().fine("Configure URI in config.yml using achievements." + achievementKey + ".metadata_uri");
+            plugin.getLogger().fine("Or using solana.pinata_base_uri and solana.metadata_cids." + achievementKey);
+        }
+
+        // No metadata URI configured
+        return null;
+    }
+
+    /**
      * Check if an achievement is enabled
      * @param achievementKey The achievement key
      * @return True if the achievement is enabled, false otherwise
@@ -381,6 +434,42 @@ public class ConfigManager {
             return "https://explorer.solana.com/?cluster=testnet";
         } else {
             return "https://explorer.solana.com";
+        }
+    }
+
+    /**
+     * Get the Solana Explorer URL for a specific address
+     * @param address The address to view
+     * @return The complete Solana Explorer URL for the address
+     */
+    public String getSolanaExplorerAddressUrl(String address) {
+        String network = getSolanaNetwork();
+        if ("mainnet".equals(network)) {
+            return "https://explorer.solana.com/address/" + address;
+        } else if ("devnet".equals(network)) {
+            return "https://explorer.solana.com/address/" + address + "?cluster=devnet";
+        } else if ("testnet".equals(network)) {
+            return "https://explorer.solana.com/address/" + address + "?cluster=testnet";
+        } else {
+            return "https://explorer.solana.com/address/" + address;
+        }
+    }
+
+    /**
+     * Get the Solana Explorer URL for a specific transaction
+     * @param txId The transaction ID to view
+     * @return The complete Solana Explorer URL for the transaction
+     */
+    public String getSolanaExplorerTransactionUrl(String txId) {
+        String network = getSolanaNetwork();
+        if ("mainnet".equals(network)) {
+            return "https://explorer.solana.com/tx/" + txId;
+        } else if ("devnet".equals(network)) {
+            return "https://explorer.solana.com/tx/" + txId + "?cluster=devnet";
+        } else if ("testnet".equals(network)) {
+            return "https://explorer.solana.com/tx/" + txId + "?cluster=testnet";
+        } else {
+            return "https://explorer.solana.com/tx/" + txId;
         }
     }
 }

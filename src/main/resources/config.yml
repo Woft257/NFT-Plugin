@@ -32,6 +32,7 @@ achievements:
       - "LUCK:1"
     unbreakable: true
     glowing: true
+    metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"  # URL to complete metadata on Pinata
 
   # Lucky Charm II - Emerald (2% Luck Buff)
   lucky_charm_2:
@@ -329,8 +330,19 @@ solana:
   confirmation_timeout: 60000  # Timeout for transaction confirmation in milliseconds
   retry_count: 3               # Number of retries for failed transactions
   metadata_upload_timeout: 30000  # Timeout for metadata upload in milliseconds
+  # Metadata Settings
   use_metadata_image_url: true # Whether to use image URL from metadata file instead of fixed URL
   default_image_url: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreih2avuy37j27jqbscnbyqx5pesaq7a5d5ga4uorxs2mdst4tfduna"  # Default image URL if not found in metadata
+
+  # Pinata Metadata Settings
+  use_pinata_metadata: true    # Whether to use complete metadata files from Pinata
+  pinata_base_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/"  # Base URI for Pinata IPFS
+
+  # Metadata CIDs for each NFT type
+  # These will be combined with pinata_base_uri to form the complete metadata URI
+  metadata_cids:
+    lucky_charm_1: "bafkreih5hvacyeu4ojl374t7s3bhdeje3xnwxkmyqz2cidsqto6k5pavhy"
+    # Add more CIDs for other NFT types here
 
 # NFT Inventory Settings
 inventory:
