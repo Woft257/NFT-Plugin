@@ -67,6 +67,7 @@ achievements:
     unbreakable: true
     glowing: true
     metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreicjvo57hr6mxfvmfummcst7ictheph75vw3ztehd4xyuhukdkslmu"
+    detail_link: "https://example.com/nft/lucky_charm_5"
 
   # Lucky Charm X - Emerald (10% Luck Buff)
   lucky_charm_10:
@@ -194,6 +195,7 @@ achievements:
     unbreakable: true
     glowing: true
     metadata_uri: "https://cyan-perfect-clam-972.mypinata.cloud/ipfs/bafkreie4q7xze4p4ze72wth6b5czsp6uxmfkmuqnh23wi4fkreuyum5yli"
+    detail_link: "https://example.com/nft/explosion_pickaxe_5"
 
   # Laser Pickaxe I - Iron Pickaxe (2 Blocks Deep)
   laser_pickaxe_1:
